@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JobRaven – Panel zarządzania</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 24px; background: #f4f4f5; color: #18181b; }
+    h1 { margin-top: 0; font-size: 1.5rem; }
+    .card { background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 20px; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #e4e4e7; }
+    th { font-weight: 600; color: #71717a; font-size: 0.8rem; text-transform: uppercase; }
+    tr:hover { background: #fafafa; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; }
+    .badge--valid { background: #dcfce7; color: #166534; }
+    .badge--expired { background: #fee2e2; color: #991b1b; }
+    .badge--disabled { background: #fef3c7; color: #92400e; }
+    .meta { color: #71717a; font-size: 0.85rem; margin-top: 4px; }
+    .loading { color: #71717a; }
+    .error { color: #b91c1c; }
+    .org-list { margin: 8px 0; font-size: 0.9rem; color: #52525b; }
+    .btn { padding: 6px 12px; border-radius: 6px; border: 1px solid #d4d4d8; background: #fff; cursor: pointer; font-size: 0.85rem; margin-right: 6px; }
+    .btn:hover { background: #f4f4f5; }
+    .btn--danger { border-color: #fca5a5; color: #b91c1c; }
+    .btn--small { padding: 4px 8px; font-size: 0.75rem; }
+    .edit-row { background: #f8fafc; }
+    .edit-row td { padding: 12px; vertical-align: top; }
+    .edit-row input, .edit-row select { margin-right: 8px; margin-bottom: 6px; padding: 6px 8px; }
+    .auth-required { margin: 16px 0; padding: 12px; background: #fef3c7; border-radius: 8px; }
+    .notices-form { margin-top: 16px; padding: 12px; background: #f8fafc; border-radius: 8px; }
+    .notices-form input, .notices-form textarea { display: block; width: 100%; max-width: 640px; margin-bottom: 8px; padding: 8px; }
+    .notices-form textarea { min-height: 120px; resize: vertical; font-family: inherit; }
+    .notices-form .form-hint { font-size: 0.85rem; color: #71717a; margin-bottom: 8px; }
+    .notices-form .preview-box { max-width: 640px; margin-top: 8px; padding: 12px; border: 1px solid #e4e4e7; border-radius: 6px; background: #fff; min-height: 60px; }
+    .notices-list { margin-top: 16px; }
+    .notices-list h3 { font-size: 1rem; margin: 0 0 8px 0; }
+    .notices-list .notice-item { padding: 12px 0; border-bottom: 1px solid #e4e4e7; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .notices-list .notice-item:last-child { border-bottom: 0; }
+    .notices-list .notice-body-preview { color: #52525b; font-size: 0.9rem; max-height: 4em; overflow: hidden; text-overflow: ellipsis; }
+    .notices-list .notice-actions { flex-shrink: 0; }
+    .admin-nav { display: flex; gap: 0; margin-bottom: 20px; border-bottom: 1px solid #e4e4e7; }
+    .admin-nav a { padding: 10px 16px; text-decoration: none; color: #52525b; font-weight: 500; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+    .admin-nav a:hover { color: #18181b; }
+    .admin-nav a.active { color: #18181b; border-bottom-color: #18181b; }
+    .admin-pane { display: none; }
+    .admin-pane.active { display: block; }
+    .stat-big { font-size: 2rem; font-weight: 700; color: #18181b; }
+    .stats-chart { display: flex; align-items: flex-end; gap: 4px; height: 200px; margin: 16px 0; padding: 12px 0; border-bottom: 1px solid #e4e4e7; }
+    .stats-chart .bar { flex: 1; min-width: 8px; background: #3b82f6; border-radius: 4px 4px 0 0; min-height: 2px; }
+    .stats-chart .bar:hover { background: #2563eb; }
+    .stats-chart-wrap { overflow-x: auto; }
+    .stats-notices-table { margin-top: 16px; }
+    .admin-login-wrap { max-width: 360px; margin: 48px auto; padding: 24px; }
+    .admin-login-wrap h2 { margin-top: 0; font-size: 1.25rem; }
+    .admin-login-wrap input { display: block; width: 100%; padding: 10px 12px; margin: 8px 0 16px; border: 1px solid #d4d4d8; border-radius: 6px; font-size: 1rem; }
+    .admin-login-wrap .btn-primary { background: #18181b; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .admin-login-wrap .btn-primary:hover { background: #27272a; }
+    .admin-login-wrap .login-err { color: #b91c1c; font-size: 0.9rem; margin-top: 8px; }
+    .admin-logout { font-size: 0.85rem; color: #71717a; margin-left: 16px; }
+    .admin-logout a { color: #52525b; }
+  </style>
+</head>
+<body>
+  <div id="adminLogin" class="card admin-login-wrap" style="display: none;">
+    <h2>Logowanie do panelu admina</h2>
+    <p class="meta">Podaj użytkownika i hasło.</p>
+    <form id="adminLoginForm">
+      <label for="adminUsername">Użytkownik</label>
+      <input type="text" id="adminUsername" name="username" autocomplete="username" value="admin" />
+      <label for="adminPassword">Hasło</label>
+      <input type="password" id="adminPassword" name="password" autocomplete="current-password" />
+      <button type="submit" class="btn-primary">Zaloguj</button>
+    </form>
+    <p id="adminLoginErr" class="login-err"></p>
+  </div>
+  <div id="adminPanel">
+  <div class="card">
+    <h1>Panel zarządzania – JobRaven <span class="admin-logout"><a href="#" id="adminLogout">Wyloguj</a></span></h1>
+    <p class="meta">Organizacje: <span id="orgList" class="org-list">—</span></p>
+  </div>
+  <div class="card">
+    <nav class="admin-nav">
+      <a href="#" id="navUsers" class="active">1. Użytkownicy</a>
+      <a href="#" id="navNotices">2. Komunikaty</a>
+      <a href="#" id="navStats">3. Statystyki</a>
+      <a href="#" id="navAds">4. Reklamy</a>
+    </nav>
+    <div id="paneUsers" class="admin-pane active">
+      <div id="content" class="loading">Ładowanie…</div>
+    </div>
+    <div id="paneNotices" class="admin-pane">
+      <p class="meta" style="margin-top: 0;">Komunikaty widoczne w aplikacji w „Komunikaty” i „Historia komunikatów”.</p>
+      <div id="noticesContent" class="loading">Ładowanie…</div>
+    </div>
+    <div id="paneStats" class="admin-pane">
+      <div id="statsContent" class="loading">Ładowanie…</div>
+    </div>
+    <div id="paneAds" class="admin-pane">
+      <p class="meta" style="margin-top: 0;">Baner reklamowy w aplikacji (slot 700×100). Statystyki wyświetleń i kampanie będą dostępne w przyszłości.</p>
+      <p class="meta">Obszar banera jest połączony z tym panelem – w przyszłości tutaj będzie konfiguracja i statystyki reklam.</p>
+    </div>
+  </div>
+  </div>
+  <script>
+    (function () {
+      const params = new URLSearchParams(window.location.search)
+      const adminKey = params.get('key') || sessionStorage.getItem('jobraven_admin_key') || ''
+      if (adminKey) sessionStorage.setItem('jobraven_admin_key', adminKey)
+
+      var apiBase = (window.location.origin && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) ? window.location.origin : ''
+      const loginEl = document.getElementById('adminLogin')
+      const panelEl = document.getElementById('adminPanel')
+
+      if (!apiBase) {
+        panelEl.style.display = 'block'
+        loginEl.style.display = 'none'
+        document.getElementById('content').innerHTML = '<p class="auth-required">Panel musi być otwarty z adresu serwera (np. <a href="http://localhost:3000/admin/">http://localhost:3000/admin/</a>).</p>'
+        return
+      }
+
+      if (!adminKey) {
+        loginEl.style.display = 'block'
+        panelEl.style.display = 'none'
+        document.getElementById('adminLoginForm').addEventListener('submit', function (e) {
+          e.preventDefault()
+          var errEl = document.getElementById('adminLoginErr')
+          errEl.textContent = ''
+          var username = (document.getElementById('adminUsername') || {}).value || ''
+          var password = (document.getElementById('adminPassword') || {}).value || ''
+          fetch(apiBase + '/api/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: username.trim(), password: password })
+          }).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d } }) }).then(function (x) {
+            if (x.ok && x.data.token) {
+              sessionStorage.setItem('jobraven_admin_key', x.data.token)
+              window.location.reload()
+            } else {
+              errEl.textContent = 'Nieprawidłowy użytkownik lub hasło.'
+            }
+          }).catch(function () { errEl.textContent = 'Błąd połączenia z serwerem.' })
+        })
+        document.getElementById('adminLogout').addEventListener('click', function (e) { e.preventDefault() })
+        return
+      }
+
+      document.getElementById('adminLogout').addEventListener('click', function (e) {
+        e.preventDefault()
+        sessionStorage.removeItem('jobraven_admin_key')
+        window.location.reload()
+      })
+
+      function headers() {
+        const key = sessionStorage.getItem('jobraven_admin_key')
+        const h = { 'Content-Type': 'application/json' }
+        if (key) h['X-Admin-Key'] = key
+        return h
+      }
+
+      function url(path) {
+        const key = sessionStorage.getItem('jobraven_admin_key')
+        return key ? path + (path.indexOf('?') >= 0 ? '&' : '?') + 'key=' + encodeURIComponent(key) : path
+      }
+
+      function escapeHtml(s) {
+        if (!s) return ''
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+      }
+
+      function fetchJson(u, opts) {
+        return fetch(u, opts).then(function (r) {
+          return r.text().then(function (text) {
+            var t = text ? text.trim() : ''
+            if (t === '' && r.ok) return { ok: true }
+            if (t.startsWith('{') || t.startsWith('[')) {
+              try { return JSON.parse(text) } catch (e) { return { error: 'INVALID_JSON', _raw: text.slice(0, 200) } }
+            }
+            return { error: 'NOT_JSON', _message: 'Serwer zwrócił stronę HTML zamiast JSON. Otwórz panel pod adresem serwera (np. http://localhost:3000/admin/).' }
+          })
+        })
+      }
+
+      const content = document.getElementById('content')
+      const orgListEl = document.getElementById('orgList')
+      const noticesContent = document.getElementById('noticesContent')
+
+      function showPane(paneId) {
+        document.querySelectorAll('.admin-pane').forEach(function (el) { el.classList.remove('active') })
+        document.querySelectorAll('.admin-nav a').forEach(function (el) { el.classList.remove('active') })
+        var pane = document.getElementById(paneId)
+        var navId = paneId === 'paneUsers' ? 'navUsers' : (paneId === 'paneNotices' ? 'navNotices' : (paneId === 'paneStats' ? 'navStats' : 'navAds'))
+        if (pane) pane.classList.add('active')
+        var navEl = document.getElementById(navId)
+        if (navEl) navEl.classList.add('active')
+        if (paneId === 'paneStats') loadStats()
+      }
+      document.getElementById('navUsers').addEventListener('click', function (e) { e.preventDefault(); showPane('paneUsers') })
+      document.getElementById('navNotices').addEventListener('click', function (e) { e.preventDefault(); showPane('paneNotices') })
+      document.getElementById('navStats').addEventListener('click', function (e) { e.preventDefault(); showPane('paneStats') })
+      document.getElementById('navAds').addEventListener('click', function (e) { e.preventDefault(); showPane('paneAds') })
+
+      var statsContent = document.getElementById('statsContent')
+      function loadStats() {
+        statsContent.innerHTML = '<span class="loading">Ładowanie statystyk…</span>'
+        fetchJson(apiBase + url('/api/admin/stats'), { headers: headers() }).then(function (data) {
+          if (data.error === 'UNAUTHORIZED') {
+            statsContent.innerHTML = '<p class="auth-required">Dostęp wymaga klucza.</p>'
+            return
+          }
+          if (data.error) {
+            var msg = data.error === 'NOT_JSON' && data._message ? data._message : ('Błąd: ' + (data.error || 'nieznany'))
+            if (data.error === 'NOT_FOUND') msg = 'Endpoint nie znaleziony. Upewnij się, że serwer jest zrestartowany po aktualizacji (npm run server).'
+            statsContent.innerHTML = '<p class="error">' + escapeHtml(msg) + '</p>'
+            return
+          }
+          var totalUsers = data.totalUsers ?? 0
+          var usersOverTime = Array.isArray(data.usersOverTime) ? data.usersOverTime : []
+          var noticeStats = Array.isArray(data.noticeStats) ? data.noticeStats : []
+          var maxCount = Math.max(1, usersOverTime.length ? Math.max.apply(null, usersOverTime.map(function (d) { return d.count })) : 0)
+          var chartHtml = usersOverTime.length
+            ? '<div class="stats-chart-wrap"><div class="stats-chart" style="min-width: ' + Math.max(320, usersOverTime.length * 24) + 'px">' +
+              usersOverTime.map(function (d) {
+                var pct = maxCount > 0 ? (100 * d.count / maxCount) : 0
+                return '<div class="bar" title="' + d.date + ': ' + d.count + ' użytkowników" style="height: ' + Math.max(2, pct) + '%"></div>'
+              }).join('') + '</div></div>'
+            : '<p class="meta">Brak danych do wykresu (brak użytkowników z datą rejestracji).</p>'
+          var tableRows = noticeStats.length
+            ? noticeStats.map(function (n) {
+                return '<tr><td>' + escapeHtml(n.title) + '</td><td>' + escapeHtml(n.date) + '</td><td>' + n.unique_readers + '</td><td>' + n.total_reads + '</td></tr>'
+              }).join('')
+            : '<tr><td colspan="4" class="meta">Brak komunikatów lub brak odczytów.</td></tr>'
+          statsContent.innerHTML =
+            '<p class="meta" style="margin-top: 0;">Liczba użytkowników i odczyty komunikatów.</p>' +
+            '<p><strong>Liczba użytkowników:</strong> <span class="stat-big">' + totalUsers + '</span></p>' +
+            '<h3 style="margin-top: 24px; margin-bottom: 8px;">Użytkownicy w czasie (wykres skumulowany)</h3>' +
+            chartHtml +
+            '<h3 style="margin-top: 24px; margin-bottom: 8px;">Statystyki komunikatów</h3>' +
+            '<p class="meta">Ile użytkowników odczytało dany komunikat i ile razy łącznie.</p>' +
+            '<table class="stats-notices-table"><thead><tr><th>Tytuł</th><th>Data</th><th>Użytkowników odczytało</th><th>Łącznie odczytów</th></tr></thead><tbody>' + tableRows + '</tbody></table>'
+        }).catch(function () {
+          statsContent.innerHTML = '<p class="error">Nie udało się załadować statystyk.</p>'
+        })
+      }
+
+      Promise.all([
+        fetchJson(apiBase + url('/api/admin/organizations'), { headers: headers() }).catch(() => ({ organizations: [] })),
+        fetchJson(apiBase + url('/api/admin/users'), { headers: headers() }).catch(() => ({ users: [] })),
+        fetchJson(apiBase + url('/api/admin/notices'), { headers: headers() }).catch(() => ({ notices: [] }))
+      ]).then(([orgData, userData, noticesData]) => {
+        if (orgData.error === 'NOT_JSON' || userData.error === 'NOT_JSON') {
+          content.innerHTML = '<p class="error">' + (orgData._message || userData._message || 'Serwer zwrócił nieprawidłową odpowiedź. Otwórz panel pod adresem <a href="http://localhost:3000/admin/">http://localhost:3000/admin/</a> gdy serwer działa.') + '</p>'
+          noticesContent.innerHTML = ''
+          return
+        }
+        if (orgData.error === 'UNAUTHORIZED' || userData.error === 'UNAUTHORIZED') {
+          sessionStorage.removeItem('jobraven_admin_key')
+          window.location.reload()
+          return
+        }
+        const organizations = orgData.organizations || []
+        const users = userData.users || []
+        let notices = noticesData.notices || []
+        orgListEl.textContent = organizations.length ? organizations.map(o => o.name || o.id).join(', ') : '—'
+
+        function stripHtml(s) {
+          if (!s) return ''
+          return String(s).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200)
+        }
+
+        function renderNotices() {
+          noticesContent.innerHTML =
+            '<div class="notices-form">' +
+            '<strong>Nowy komunikat</strong>' +
+            '<p class="form-hint">Treść może zawierać HTML (np. &lt;b&gt;, &lt;a href="..."&gt;, &lt;br&gt;, &lt;ul&gt;).</p>' +
+            '<input type="text" id="newNoticeTitle" placeholder="Tytuł" />' +
+            '<textarea id="newNoticeBody" placeholder="Treść (HTML dozwolony)"></textarea>' +
+            '<div class="preview-box" id="newNoticePreview" style="display:none;"></div>' +
+            '<button type="button" class="btn" id="btnPreviewNotice">Podgląd HTML</button> ' +
+            '<button type="button" class="btn" id="btnSendNotice">Wyślij komunikat</button>' +
+            '</div>' +
+            '<div class="notices-list">' +
+            '<h3>Historia komunikatów</h3>' +
+            (notices.length ? notices.map(function (n) {
+              var bodyPreview = stripHtml(n.body)
+              if (bodyPreview.length >= 200) bodyPreview += '…'
+              return '<div class="notice-item" data-id="' + escapeHtml(n.id) + '">' +
+                '<div><strong>' + escapeHtml(n.title || '—') + '</strong> <span class="meta">' + escapeHtml(n.date || n.created_at || '') + '</span><br>' +
+                '<span class="notice-body-preview">' + escapeHtml(bodyPreview || '(pusta treść)') + '</span></div>' +
+                '<div class="notice-actions"><button type="button" class="btn btn--small btn--danger" data-action="delete-notice" data-id="' + escapeHtml(n.id) + '">Usuń</button></div>' +
+                '</div>'
+            }).join('') : '<p class="meta">Brak komunikatów. Dodaj pierwszy powyżej.</p>') +
+            '</div>'
+          var btnSend = document.getElementById('btnSendNotice')
+          var btnPreview = document.getElementById('btnPreviewNotice')
+          var previewBox = document.getElementById('newNoticePreview')
+          if (btnSend) {
+            btnSend.addEventListener('click', function () {
+              var title = (document.getElementById('newNoticeTitle') || {}).value || ''
+              var body = (document.getElementById('newNoticeBody') || {}).value || ''
+              if (!title.trim() && !body.trim()) { alert('Podaj tytuł lub treść.'); return }
+              fetchJson(apiBase + url('/api/admin/notices'), {
+                method: 'POST',
+                headers: headers(),
+                body: JSON.stringify({ title: title.trim() || 'Bez tytułu', body: body.trim() })
+              }).then(function (data) {
+                if (data.error === 'NOT_JSON') {
+                  alert('Błąd wysyłki: serwer zwrócił stronę HTML zamiast JSON. Otwórz panel pod adresem http://localhost:3000/admin/ (gdy serwer Node działa).')
+                  return
+                }
+                if (data.notice) {
+                  notices.unshift(data.notice)
+                  var t = document.getElementById('newNoticeTitle'); if (t) t.value = ''
+                  var b = document.getElementById('newNoticeBody'); if (b) b.value = ''
+                  if (previewBox) previewBox.style.display = 'none'
+                  renderNotices()
+                } else { alert('Błąd: ' + (data.error || 'nieznany')) }
+              }).catch(function (e) { alert('Błąd wysyłki: ' + (e.message || 'sprawdź połączenie z serwerem')) })
+            })
+          }
+          if (btnPreview && previewBox) {
+            btnPreview.addEventListener('click', function () {
+              var body = (document.getElementById('newNoticeBody') || {}).value || ''
+              previewBox.innerHTML = body || '(pusta treść)'
+              previewBox.style.display = previewBox.style.display === 'none' ? 'block' : 'none'
+            })
+          }
+          noticesContent.querySelectorAll('[data-action="delete-notice"]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              var id = this.getAttribute('data-id')
+              if (!id || !confirm('Usunąć ten komunikat? Użytkownicy nie zobaczą go w historii.')) return
+              fetchJson(apiBase + url('/api/admin/notices/' + encodeURIComponent(id)), { method: 'DELETE', headers: headers() })
+                .then(function (data) {
+                  if (data.ok) {
+                    notices = notices.filter(function (n) { return n.id !== id })
+                    renderNotices()
+                  } else { alert('Błąd: ' + (data.error || 'nieznany')) }
+                })
+                .catch(function (e) { alert('Błąd: ' + (e.message || 'nieznany')) })
+            })
+          })
+        }
+        renderNotices()
+
+        if (users.length === 0) {
+          content.innerHTML = '<p>Brak zarejestrowanych użytkowników.</p>'
+          return
+        }
+
+        function renderUserRow(u, editUserId) {
+          const lic = u.active_license
+          const valid = lic && (lic.expires_at == null || new Date(lic.expires_at) > new Date())
+          const badge = u.disabled
+            ? '<span class="badge badge--disabled">Wyłączone</span>'
+            : (valid ? '<span class="badge badge--valid">Aktywna</span>' : '<span class="badge badge--expired">Wygasła</span>')
+          const expires = lic && lic.expires_at ? new Date(lic.expires_at).toLocaleDateString('pl-PL') : (lic ? 'Nigdy' : '—')
+          const plan = (lic && lic.plan) ? lic.plan : '—'
+          const licenseKey = (lic && lic.license_key) ? lic.license_key : '—'
+          const lastVerif = u.last_license_verification_at ? new Date(u.last_license_verification_at).toLocaleString('pl-PL') : '—'
+          const lastLoginAt = u.last_login_at ? new Date(u.last_login_at).toLocaleString('pl-PL') : '—'
+          const lastLoginInfo = u.last_login_ip || u.last_login_location
+            ? (u.last_login_location ? escapeHtml(u.last_login_location) + (u.last_login_ip ? ' <span class="meta">(' + escapeHtml(u.last_login_ip) + ')</span>' : '') : escapeHtml(u.last_login_ip || ''))
+            : '—'
+          const lastLoginCell = lastLoginAt !== '—' ? lastLoginAt + (lastLoginInfo !== '—' ? '<br><span class="meta">' + lastLoginInfo + '</span>' : '') : lastLoginInfo
+          const isEdit = editUserId === u.id
+          let actions = ''
+          if (!isEdit) {
+            actions = (u.disabled
+              ? '<button type="button" class="btn btn--small" data-action="enable" data-id="' + u.id + '">Włącz konto</button>'
+              : '<button type="button" class="btn btn--small btn--danger" data-action="disable" data-id="' + u.id + '">Wyłącz konto</button>'
+            ) + '<button type="button" class="btn btn--small" data-action="edit" data-id="' + u.id + '">Edytuj licencję</button>' +
+            '<button type="button" class="btn btn--small btn--danger" data-action="delete" data-id="' + u.id + '" title="Usuń użytkownika na stałe">Usuń</button>'
+          }
+          return '<tr data-id="' + u.id + '">' +
+            '<td>' + u.id + '</td>' +
+            '<td>' + (u.email || '—') + '</td>' +
+            '<td>' + (u.display_name || '—') + '</td>' +
+            '<td>' + (u.organization_id || '—') + '</td>' +
+            '<td>' + (u.created_at ? new Date(u.created_at).toLocaleDateString('pl-PL') : '—') + '</td>' +
+            '<td>' + plan + '</td>' +
+            '<td>' + (licenseKey !== '—' ? '<code style="font-size:0.75rem">' + licenseKey + '</code>' : '—') + '</td>' +
+            '<td>' + badge + ' ' + expires + '</td>' +
+            '<td>' + lastVerif + '</td>' +
+            '<td>' + lastLoginCell + '</td>' +
+            '<td>' + actions + '</td></tr>' +
+            (isEdit ? '<tr class="edit-row" data-edit-for="' + u.id + '"><td colspan="11">' +
+              '<label>Plan: <select id="editPlan"><option value="darmowa"' + (plan === 'darmowa' ? ' selected' : '') + '>darmowa</option><option value="trial"' + (plan === 'trial' ? ' selected' : '') + '>trial</option><option value="płatna"' + (plan === 'płatna' ? ' selected' : '') + '>płatna</option></select></label>' +
+              '<label>Wygasa: <input type="date" id="editExpires" value="' + (lic && lic.expires_at ? lic.expires_at.slice(0, 10) : '') + '"></label>' +
+              '<label>Kod licencyjny: <input type="text" id="editKey" placeholder="opcjonalnie" value="' + (lic && lic.license_key ? String(lic.license_key).replace(/"/g, '&quot;') : '') + '" style="min-width:180px"></label>' +
+              '<button type="button" class="btn" data-action="save-license" data-id="' + u.id + '">Zapisz</button>' +
+              '<button type="button" class="btn" data-action="cancel-edit" data-id="' + u.id + '">Anuluj</button>' +
+              '</td></tr>' : '')
+        }
+
+        let editUserId = null
+        content.addEventListener('click', function (e) {
+          var btn = e.target && e.target.closest && e.target.closest('[data-action]')
+          if (!btn) return
+          var action = btn.getAttribute('data-action')
+          var id = parseInt(btn.getAttribute('data-id'), 10)
+          if (action === 'disable') {
+                fetch(apiBase + url('/api/admin/users/' + id), { method: 'PATCH', headers: headers(), body: JSON.stringify({ disabled: true }) })
+                  .then(r => r.json()).then(() => { users.find(u => u.id === id).disabled = true; render(null) })
+                  .catch(() => alert('Błąd zapisu'))
+              } else if (action === 'enable') {
+                fetch(apiBase + url('/api/admin/users/' + id), { method: 'PATCH', headers: headers(), body: JSON.stringify({ disabled: false }) })
+                  .then(r => r.json()).then(() => { users.find(u => u.id === id).disabled = false; render(null) })
+                  .catch(() => alert('Błąd zapisu'))
+              } else if (action === 'delete') {
+                if (!confirm('Czy na pewno usunąć tego użytkownika? Zostaną usunięte konto, licencje i powiązane dane. Tej operacji nie można cofnąć.')) return
+                fetchJson(apiBase + url('/api/admin/users/' + id), { method: 'DELETE', headers: headers() })
+                  .then(function (data) {
+                    if (data.ok) {
+                      const idx = users.findIndex(function (u) { return u.id === id })
+                      if (idx >= 0) users.splice(idx, 1)
+                      render(null)
+                    } else {
+                      alert('Błąd: ' + (data.error || 'nieznany'))
+                    }
+                  })
+                  .catch(function (e) { alert('Błąd: ' + (e.message || 'nieznany')) })
+              } else if (action === 'edit') {
+                render(id)
+              } else if (action === 'cancel-edit') {
+                render(null)
+              } else if (action === 'save-license') {
+                const plan = document.getElementById('editPlan').value
+                const expires = document.getElementById('editExpires').value
+                const key = document.getElementById('editKey').value.trim() || null
+                fetch(apiBase + url('/api/admin/users/' + id), {
+                  method: 'PATCH',
+                  headers: headers(),
+                  body: JSON.stringify({ license: { plan, expires_at: expires ? expires : null, license_key: key } })
+                }).then(function (r) {
+                  return r.json().then(function (data) {
+                    if (!r.ok) {
+                      throw new Error(data.error || 'Status ' + r.status)
+                    }
+                    return data
+                  })
+                }).then(function (data) {
+                  if (data.user) {
+                    const idx = users.findIndex(function (u) { return u.id === id })
+                    if (idx >= 0) users[idx] = data.user
+                  }
+                  render(null)
+                }).catch(function (err) {
+                  alert('Błąd zapisu: ' + (err.message || 'nieznany'))
+                })
+              }
+        })
+        function render(editId) {
+          editUserId = editId
+          content.innerHTML = '<table><thead><tr><th>ID</th><th>E-mail</th><th>Nazwa</th><th>Organizacja</th><th>Rejestracja</th><th>Plan</th><th>Kod licencji</th><th>Status / Wygasa</th><th>Ostatnia weryfikacja</th><th>Lokalizacja (rejestracja)</th><th>Akcje</th></tr></thead><tbody>' +
+            users.map(u => renderUserRow(u, editUserId)).join('') +
+            '</tbody></table>'
+        }
+        render(null)
+      }).catch(() => {
+        content.innerHTML = '<p class="error">Nie udało się załadować danych. Upewnij się, że serwer działa i odśwież stronę.</p>'
+      })
+    })()
+  </script>
+</body>
+</html>
