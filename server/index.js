@@ -208,6 +208,11 @@ app.get('/admin/', sendAdminNoCache)
 app.get('/admin/login', (req, res) => res.redirect(302, '/admin/'))
 app.use('/admin', express.static(path.join(__dirname, 'public', 'admin')))
 
+const landingIndex = path.join(__dirname, 'public', 'landing', 'index.html')
+app.get('/landing', (req, res) => res.sendFile(landingIndex))
+app.get('/landing/', (req, res) => res.sendFile(landingIndex))
+app.use('/landing', express.static(path.join(__dirname, 'public', 'landing')))
+
 // Strona resetu hasła (link z e-maila) – treść zależna od lang w query
 app.get('/reset-password', (req, res) => {
   const token = (req.query.token || '').toString().trim()
