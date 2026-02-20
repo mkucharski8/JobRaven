@@ -359,11 +359,8 @@
           const plan = (lic && lic.plan) ? lic.plan : '—'
           const licenseKey = (lic && lic.license_key) ? lic.license_key : '—'
           const lastVerif = u.last_license_verification_at ? new Date(u.last_license_verification_at).toLocaleString('pl-PL') : '—'
-          const lastLoginAt = u.last_login_at ? new Date(u.last_login_at).toLocaleString('pl-PL') : '—'
-          const lastLoginInfo = u.last_login_ip || u.last_login_location
-            ? (u.last_login_location ? escapeHtml(u.last_login_location) + (u.last_login_ip ? ' <span class="meta">(' + escapeHtml(u.last_login_ip) + ')</span>' : '') : escapeHtml(u.last_login_ip || ''))
-            : '—'
-          const lastLoginCell = lastLoginAt !== '—' ? lastLoginAt + (lastLoginInfo !== '—' ? '<br><span class="meta">' + lastLoginInfo + '</span>' : '') : lastLoginInfo
+          const registrationAt = u.created_at ? new Date(u.created_at).toLocaleString('pl-PL') : '—'
+          const locationCell = u.last_login_location ? escapeHtml(u.last_login_location) : '—'
           const isEdit = editUserId === u.id
           let actions = ''
           if (!isEdit) {
@@ -378,12 +375,12 @@
             '<td>' + (u.email || '—') + '</td>' +
             '<td>' + (u.display_name || '—') + '</td>' +
             '<td>' + (u.organization_id || '—') + '</td>' +
-            '<td>' + (u.created_at ? new Date(u.created_at).toLocaleDateString('pl-PL') : '—') + '</td>' +
+            '<td>' + registrationAt + '</td>' +
             '<td>' + plan + '</td>' +
             '<td>' + (licenseKey !== '—' ? '<code style="font-size:0.75rem">' + licenseKey + '</code>' : '—') + '</td>' +
             '<td>' + badge + ' ' + expires + '</td>' +
             '<td>' + lastVerif + '</td>' +
-            '<td>' + lastLoginCell + '</td>' +
+            '<td>' + locationCell + '</td>' +
             '<td>' + actions + '</td></tr>' +
             (isEdit ? '<tr class="edit-row" data-edit-for="' + u.id + '"><td colspan="11">' +
               '<label>Plan: <select id="editPlan"><option value="darmowa"' + (plan === 'darmowa' ? ' selected' : '') + '>darmowa</option><option value="trial"' + (plan === 'trial' ? ' selected' : '') + '>trial</option><option value="płatna"' + (plan === 'płatna' ? ' selected' : '') + '>płatna</option></select></label>' +
