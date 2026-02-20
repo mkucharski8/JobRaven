@@ -199,8 +199,12 @@ app.post('/api/admin/login', (req, res) => {
 })
 
 const adminIndex = path.join(__dirname, 'public', 'admin', 'index.html')
-app.get('/admin', (req, res) => res.sendFile(adminIndex))
-app.get('/admin/', (req, res) => res.sendFile(adminIndex))
+function sendAdminNoCache(req, res) {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate')
+  res.sendFile(adminIndex)
+}
+app.get('/admin', sendAdminNoCache)
+app.get('/admin/', sendAdminNoCache)
 app.get('/admin/login', (req, res) => res.redirect(302, '/admin/'))
 app.use('/admin', express.static(path.join(__dirname, 'public', 'admin')))
 
