@@ -32,7 +32,7 @@ Domyślnie nasłuchuje na **http://localhost:3000**.
    Aplikacja domyślnie łączy się z `http://localhost:3000` – nie musisz nic ustawiać w Ustawieniach.
 
 3. **Zaloguj się** w aplikacji jednym z kont testowych (po seedzie):
-   - **Email:** `mkucharski8@gmail.com` **Hasło:** `123456`
+   - **Email:** (patrz plik users.json po seedzie) **Hasło:** (domyślne hasło deweloperskie – zmień w produkcji)
    - **Email:** `admin2@localhost` **Hasło:** `123456`  
    Oba mają licencję bez daty wygaśnięcia.
 

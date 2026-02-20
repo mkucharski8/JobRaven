@@ -10,7 +10,7 @@ const BASE_URL = process.env.BASE_URL || process.env.JOBRAVEN_BASE_URL || 'http:
 
 // Mailgun API (HTTPS) – działa na Railway; nie wymaga portów SMTP
 const MAILGUN_API_KEY_RAW = (process.env.MAILGUN_API_KEY || process.env.JOBRAVEN_MAILGUN_API_KEY || '').trim()
-// Nowe klucze Mailgun mają format z myślnikami (np. xxx-5ba06dbe-cf8d60e6) – używaj as-is. Stare klucze (krótki hex) dopisz key-.
+// Nowe klucze Mailgun mają format z myślnikami (np. xxx-xxxxxxxx-xxxxxxxx) – używaj as-is. Stare klucze (krótki hex) dopisz key-.
 const MAILGUN_API_KEY = MAILGUN_API_KEY_RAW
   ? (MAILGUN_API_KEY_RAW.startsWith('key-') || MAILGUN_API_KEY_RAW.includes('-')
     ? MAILGUN_API_KEY_RAW
