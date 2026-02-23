@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Routes, Route, NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import logoHorizontal from './assets/logo-horizontal_transp.png'
 import orderBookIcon from './assets/nav/order-book.png'
 import subcontractsIcon from './assets/nav/subcontracts.png'
 import customersIcon from './assets/nav/customers.png'
@@ -224,7 +225,7 @@ function Layout({
           />
         </div>
       </header>
-      <main style={{ flex: 1, minHeight: 0, padding: '1.5rem', overflow: 'auto' }}>
+      <main style={{ flex: 1, minHeight: 0, padding: '1.5rem 1.5rem 0 1.5rem', overflow: 'auto' }}>
         <SettingsWarnings
           minimized={warningsMinimized}
           onMinimize={() => setWarningsMinimized(true)}
@@ -317,7 +318,7 @@ export default function App() {
   const { t, i18n } = useTranslation()
   const [loading, setLoading] = useState(true)
   const [sessionUser, setSessionUser] = useState<SessionUser | null>(null)
-  const [organizations, setOrganizations] = useState<Array<{ id: string; name: string }>>([])
+  const [_organizations, setOrganizations] = useState<Array<{ id: string; name: string }>>([])
   const [selectedOrgId, setSelectedOrgId] = useState('')
   const [dismissedNoticeIds, setDismissedNoticeIds] = useState<string[]>([])
   const [noticesReady, setNoticesReady] = useState(false)
@@ -457,7 +458,7 @@ export default function App() {
     let cancelled = false
     const loadNotices = async () => {
       try {
-        const res = await window.api.app.getNotices()
+        const res = await window.api.app.getNotices?.() as { notices?: ServerNotice[] } | undefined
         if (!cancelled) setServerNotices(Array.isArray(res?.notices) ? res.notices : [])
       } catch {
         if (!cancelled) setServerNotices([])
@@ -489,7 +490,7 @@ export default function App() {
   useEffect(() => {
     if (!currentNotice?.id || !sessionUser) return
     if (showServerNotice) {
-      window.api.app.recordNoticeRead(currentNotice.id).catch(() => {})
+      window.api.app.recordNoticeRead?.(currentNotice.id).catch(() => {})
     }
   }, [showServerNotice, currentNotice?.id, sessionUser])
 
@@ -539,11 +540,11 @@ export default function App() {
   const handleResendVerification = async () => {
     setResendVerifyMessage(null)
     setError(null)
-    const result = await window.api.auth.resendVerification(email.trim(), i18n.language)
-    if (result.ok) {
+    const result = await window.api.auth.resendVerification?.(email.trim(), i18n.language)
+    if (result?.ok) {
       setResendVerifyMessage(t('auth.resendVerificationSent'))
     } else {
-      setError(t(`auth.error_${result.error ?? 'UNKNOWN'}`))
+      setError(t(`auth.error_${result?.error ?? 'UNKNOWN'}`))
     }
   }
 
@@ -552,11 +553,11 @@ export default function App() {
     setForgotPasswordMessage(null)
     setError(null)
     if (!forgotPasswordEmail.trim()) return
-    const result = await window.api.auth.forgotPassword(forgotPasswordEmail.trim(), i18n.language)
-    if (result.ok) {
+    const result = await window.api.auth.forgotPassword?.(forgotPasswordEmail.trim(), i18n.language)
+    if (result?.ok) {
       setForgotPasswordMessage(t('auth.forgotPasswordSent'))
     } else {
-      setError(t(`auth.error_${result.error ?? 'UNKNOWN'}`))
+      setError(t(`auth.error_${result?.error ?? 'UNKNOWN'}`))
     }
   }
 
@@ -638,7 +639,7 @@ export default function App() {
                         onClick={() => {
                         const next = expandedNoticeId === notice.id ? null : notice.id
                         setExpandedNoticeId(next)
-                        if (next === notice.id) window.api.app.recordNoticeRead(notice.id).catch(() => {})
+                        if (next === notice.id) window.api.app.recordNoticeRead?.(notice.id).catch(() => {})
                       }}
                         style={{ width: '100%', textAlign: 'left', padding: 12, border: 0, background: 'transparent', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}
                       >
@@ -685,11 +686,15 @@ export default function App() {
       i18n.changeLanguage(code)
       window.api?.settings?.set?.('ui_language', code)
     }
+    window.api?.app?.ensurePredefinedSettings?.(code)
   }
 
   return (
     <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: 24 }}>
       <div className="card" style={{ width: '100%', maxWidth: 420 }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20, background: 'var(--color-surface)' }}>
+          <img src={logoHorizontal} alt="JobRaven" style={{ height: 110, width: 'auto', display: 'block' }} />
+        </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 8, marginBottom: 12 }}>
           <span style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>{t('auth.languageLabel')}</span>
           {UI_LANGUAGES.map(({ code, label }) => (

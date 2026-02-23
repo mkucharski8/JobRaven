@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JobRaven – Smart Translation Workflow</title>
+  <meta name="description" content="JobRaven helps translators and language teams manage jobs, contractors, invoices, and analytics in one clean desktop app.">
+  <meta property="og:title" content="JobRaven – Smart Translation Workflow">
+  <meta property="og:description" content="Manage jobs, contractors, invoices, and analytics in one place.">
+  <meta property="og:type" content="website">
+  <style>
+    :root {
+      --bg: #0b1020;
+      --bg-soft: #111936;
+      --card: #121b3a;
+      --text: #eaf0ff;
+      --muted: #a8b3d1;
+      --primary: #6ea8ff;
+      --primary-2: #4f8fff;
+      --ok: #59d39b;
+      --border: #22315f;
+      --shadow: 0 14px 36px rgba(0, 0, 0, .34);
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; font-family: Inter, Segoe UI, Arial, sans-serif; background: radial-gradient(circle at 20% 0%, #182652 0%, var(--bg) 45%); color: var(--text); }
+    a { color: inherit; text-decoration: none; }
+    .wrap { width: min(1120px, 92vw); margin: 0 auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10;
+      backdrop-filter: blur(8px);
+      background: rgba(11,16,32,.65);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .topbar .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 0; }
+    .logo { font-weight: 800; letter-spacing: .3px; font-size: 1.05rem; }
+    .logo span { color: var(--primary); }
+    .lang {
+      display: inline-flex; border: 1px solid var(--border); border-radius: 999px; overflow: hidden;
+      background: rgba(255,255,255,.03);
+    }
+    .lang button {
+      border: 0; background: transparent; color: var(--muted); padding: 7px 12px; cursor: pointer; font-weight: 600;
+    }
+    .lang button.active { background: #1d2b59; color: var(--text); }
+    .hero { padding: 72px 0 44px; }
+    .hero-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 26px; align-items: center; }
+    h1 { margin: 0 0 14px; font-size: clamp(1.9rem, 3.6vw, 3.1rem); line-height: 1.1; letter-spacing: -.02em; }
+    .lead { margin: 0 0 18px; color: var(--muted); font-size: 1.06rem; line-height: 1.6; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border); font-weight: 700;
+      transition: .15s transform ease, .2s background ease;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn.primary { background: linear-gradient(180deg, var(--primary), var(--primary-2)); color: #071229; border-color: transparent; }
+    .btn.ghost { background: rgba(255,255,255,.03); color: var(--text); }
+    .shot {
+      border: 1px solid var(--border); background: linear-gradient(180deg, #1a2957, #111936);
+      border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px;
+    }
+    .shot .bar { height: 28px; border-radius: 8px; background: rgba(255,255,255,.06); margin-bottom: 12px; }
+    .shot .grid { display: grid; grid-template-columns: .34fr 1fr; gap: 12px; }
+    .shot .nav, .shot .pane { border-radius: 10px; min-height: 220px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); }
+    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 18px; }
+    .metric { border: 1px solid var(--border); background: rgba(255,255,255,.03); border-radius: 12px; padding: 12px; }
+    .metric b { display: block; font-size: 1.2rem; margin-bottom: 2px; }
+    .metric span { color: var(--muted); font-size: .9rem; }
+    .section { padding: 44px 0; }
+    .section h2 { margin: 0 0 8px; font-size: clamp(1.35rem, 2.5vw, 2rem); }
+    .section p.sub { margin: 0; color: var(--muted); line-height: 1.6; }
+    .cards { margin-top: 18px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .card { border: 1px solid var(--border); background: var(--card); border-radius: 12px; padding: 14px; }
+    .card h3 { margin: 0 0 8px; font-size: 1.03rem; }
+    .card p { margin: 0; color: var(--muted); line-height: 1.55; font-size: .95rem; }
+    .list { margin-top: 14px; display: grid; gap: 8px; }
+    .list .li {
+      border: 1px solid var(--border); background: rgba(255,255,255,.02);
+      border-radius: 10px; padding: 10px 12px; color: var(--muted); font-size: .95rem;
+    }
+    .li b { color: var(--text); }
+    .cta {
+      margin: 24px 0 10px; padding: 20px; border: 1px solid var(--border);
+      border-radius: var(--radius); background: linear-gradient(180deg, #13214a, #0f1732);
+      display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    }
+    .cta p { margin: 0; color: var(--muted); }
+    footer { padding: 26px 0 34px; color: var(--muted); font-size: .9rem; }
+    .tag { color: var(--ok); font-weight: 700; }
+    .badge-free { display: inline-block; background: var(--ok); color: #0b1020; font-weight: 800; padding: 4px 10px; border-radius: 8px; font-size: .85rem; margin-bottom: 8px; }
+    .logo-placeholder { height: 40px; display: flex; align-items: center; }
+    .logo-placeholder img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .carousel { position: relative; border: 1px solid var(--border); background: linear-gradient(180deg, #1a2957, #111936); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+    .carousel-inner { display: flex; transition: transform .35s ease; }
+    .carousel-slide { min-width: 100%; aspect-ratio: 16/10; background: rgba(255,255,255,.05); display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: .9rem; }
+    .carousel-slide img { width: 100%; height: 100%; object-fit: contain; }
+    .carousel-slide:has(img) span { display: none; }
+    .carousel-nav { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 2; }
+    .carousel-dot { width: 10px; height: 10px; border-radius: 50%; border: 1px solid var(--border); background: rgba(255,255,255,.2); cursor: pointer; transition: background .2s; }
+    .carousel-dot.active { background: var(--primary); }
+    .carousel-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: rgba(0,0,0,.4); color: var(--text); cursor: pointer; z-index: 2; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+    .carousel-arrow.prev { left: 10px; }
+    .carousel-arrow.next { right: 10px; }
+    .contact { margin-top: 8px; }
+    .contact a { color: var(--primary); }
+    @media (max-width: 960px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      .metrics { grid-template-columns: repeat(2, 1fr); }
+      .cards { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap row">
+      <div class="logo-placeholder" aria-label="Logo"><img src="logo_trans.png" alt="JobRaven"></div>
+      <div class="lang" role="group" aria-label="Language switcher">
+        <button id="langPl">PL</button>
+        <button id="langEn">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <div class="hero-grid">
+        <div>
+          <p class="badge-free" data-i18n="badgeFree">Za darmo</p>
+          <p class="tag" data-i18n="heroTag">m.in. repertorium wg wymaganego prawnie wzoru</p>
+          <h1 data-i18n="heroTitle">Run your translation workflow from one clean desktop app.</h1>
+          <p class="lead" data-i18n="heroLead">From incoming jobs to invoices and analytics—JobRaven keeps your daily operations organized, fast, and profitable.</p>
+          <div class="hero-actions">
+            <a class="btn primary" href="https://github.com/mkucharski8/JobRaven/releases" target="_blank" rel="noopener" data-i18n="btnDownload">Download app</a>
+            <a class="btn ghost" href="/help" data-i18n="btnHelp">Open help</a>
+          </div>
+          <div class="metrics">
+            <div class="metric"><b data-i18n="m1v">Jobs + invoices</b><span data-i18n="m1l">in one process</span></div>
+            <div class="metric"><b data-i18n="m2v">VAT-ready</b><span data-i18n="m2l">KSEF via wFirma.pl</span></div>
+            <div class="metric"><b data-i18n="m3v">Data locally</b><span data-i18n="m3l">offline, no leaks</span></div>
+            <div class="metric"><b data-i18n="m4v">Subcontracting</b><span data-i18n="m4l">contractors + notices</span></div>
+          </div>
+        </div>
+        <div class="carousel" aria-label="Screenshots">
+          <div class="carousel-inner" id="carouselInner">
+            <div class="carousel-slide"><!-- Screen 1: wstaw <img src="screen1.png" alt=""> --><span data-i18n="carouselPlaceholder">Zrzut ekranu 1</span></div>
+            <div class="carousel-slide"><!-- Screen 2 --><span data-i18n="carouselPlaceholder2">Zrzut ekranu 2</span></div>
+            <div class="carousel-slide"><!-- Screen 3 --><span data-i18n="carouselPlaceholder3">Zrzut ekranu 3</span></div>
+          </div>
+          <button type="button" class="carousel-arrow prev" id="carouselPrev" aria-label="Previous">‹</button>
+          <button type="button" class="carousel-arrow next" id="carouselNext" aria-label="Next">›</button>
+          <div class="carousel-nav" id="carouselDots"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 data-i18n="featuresTitle">Everything you need to run daily operations</h2>
+      <p class="sub" data-i18n="featuresSub">JobRaven combines job tracking, subcontracting, invoicing, and reporting in one workflow.</p>
+      <div class="cards">
+        <article class="card">
+          <h3 data-i18n="f1t">Order books & subcontracting</h3>
+          <p data-i18n="f1d">Track incoming jobs, deadlines, statuses, and assign work to contractors. Repertorium in the legally required format (m.in. for translation and related services).</p>
+        </article>
+        <article class="card">
+          <h3 data-i18n="f2t">Invoices & KSEF (wFirma.pl)</h3>
+          <p data-i18n="f2d">Create and monitor invoices; integration with KSEF via wFirma.pl. Payment due dates and accounting-ready exports.</p>
+        </article>
+        <article class="card">
+          <h3 data-i18n="f3t">Client base & compliance</h3>
+          <p data-i18n="f3d">Client management and integration with GUS and VAT register. Revenue, VAT, volumes, and trends by client, service, or period.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 data-i18n="securityTitle">Your data stays with you</h2>
+      <p class="sub" data-i18n="securitySub">Data is stored locally on your computer. No leaks—your and your clients’ data never leave your control. Work offline when you need to.</p>
+      <div class="list">
+        <div class="li"><b data-i18n="b1t">Client-specific rates:</b> <span data-i18n="b1d">keep pricing logic close to real work.</span></div>
+        <div class="li"><b data-i18n="b2t">Service VAT rules:</b> <span data-i18n="b2d">domestic/EU/world behavior with override options.</span></div>
+        <div class="li"><b data-i18n="b3t">Operational clarity:</b> <span data-i18n="b3d">one place for statuses, deadlines, and invoice state.</span></div>
+      </div>
+    </section>
+
+    <section class="cta">
+      <div>
+        <h2 style="margin:0 0 4px" data-i18n="ctaTitle">Start with JobRaven today</h2>
+        <p data-i18n="ctaText">Open the app, configure your services and VAT rules, and run your next project end-to-end.</p>
+      </div>
+      <div class="hero-actions" style="margin:0">
+        <a class="btn primary" href="https://github.com/mkucharski8/JobRaven/releases" target="_blank" rel="noopener" data-i18n="btnDownload">Download app</a>
+        <a class="btn ghost" href="/help" data-i18n="btnHelp">Open help</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    <span data-i18n="footer">JobRaven • Translation workflow desktop app</span>
+    <p class="contact"><a href="https://www.marcinkucharski.pl" target="_blank" rel="noopener">www.marcinkucharski.pl</a></p>
+  </footer>
+
+  <script>
+    const i18n = {
+      en: {
+        badgeFree: 'Free',
+        heroTag: 'Incl. repertorium in the legally required format',
+        heroTitle: 'Run your workflow from one clean desktop app.',
+        heroLead: 'From incoming jobs to invoices and analytics—JobRaven keeps your daily operations organized, fast, and profitable. Data stored locally; work offline.',
+        btnDownload: 'Download app',
+        btnHelp: 'Open help',
+        m1v: 'Jobs + invoices',
+        m1l: 'in one process',
+        m2v: 'KSEF',
+        m2l: 'via wFirma.pl',
+        m3v: 'Data locally',
+        m3l: 'offline, no leaks',
+        m4v: 'Subcontracting',
+        m4l: 'contractors + notices',
+        featuresTitle: 'Everything you need to run daily operations',
+        featuresSub: 'JobRaven combines job tracking, subcontracting, invoicing, and reporting in one workflow.',
+        f1t: 'Order books & subcontracting',
+        f1d: 'Track incoming jobs, deadlines, statuses, and assign work to contractors. Repertorium in the legally required format (e.g. for translation and related services).',
+        f2t: 'Invoices & KSEF (wFirma.pl)',
+        f2d: 'Create and monitor invoices; integration with KSEF via wFirma.pl. Payment due dates and accounting-ready exports.',
+        f3t: 'Client base & compliance',
+        f3d: 'Client management and integration with GUS and VAT register. Revenue, VAT, volumes, and trends by client, service, or period.',
+        securityTitle: 'Your data stays with you',
+        securitySub: 'Data is stored locally on your computer. No leaks—your and your clients’ data never leave your control. Work offline when you need to.',
+        b1t: 'Client-specific rates:',
+        b1d: 'keep pricing logic close to real work.',
+        b2t: 'Service VAT rules:',
+        b2d: 'domestic/EU/world behavior with override options.',
+        b3t: 'Operational clarity:',
+        b3d: 'one place for statuses, deadlines, and invoice state.',
+        ctaTitle: 'Start with JobRaven today',
+        ctaText: 'Open the app, configure your services and VAT rules, and run your next project end-to-end.',
+        footer: 'JobRaven • Translation workflow desktop app',
+        carouselPlaceholder: 'Screenshot 1',
+        carouselPlaceholder2: 'Screenshot 2',
+        carouselPlaceholder3: 'Screenshot 3'
+      },
+      pl: {
+        badgeFree: 'Za darmo',
+        heroTag: 'm.in. obsługa repertorium wg wymaganego prawnie wzoru',
+        heroTitle: 'Prowadź cały workflow w jednej, przejrzystej aplikacji desktop.',
+        heroLead: 'Od przyjęcia zlecenia po fakturę i analitykę — JobRaven porządkuje codzienną pracę. Dane przechowywane lokalnie; praca offline.',
+        btnDownload: 'Pobierz aplikację',
+        btnHelp: 'Otwórz pomoc',
+        m1v: 'Zlecenia + faktury',
+        m1l: 'w jednym procesie',
+        m2v: 'KSEF',
+        m2l: 'przez wFirma.pl',
+        m3v: 'Dane lokalnie',
+        m3l: 'offline, bez wycieków',
+        m4v: 'Podzlecenia',
+        m4l: 'wykonawcy + komunikaty',
+        featuresTitle: 'Wszystko, czego potrzebujesz do codziennej pracy',
+        featuresSub: 'JobRaven łączy obsługę zleceń, podzleceń, faktur i raportów w jednym przepływie.',
+        f1t: 'Księgi zleceń i podzlecenia',
+        f1d: 'Kontroluj terminy, statusy i przypisuj pracę wykonawcom. Repertorium w wymaganym prawnie wzorze (m.in. dla tłumaczeń i usług pokrewnych).',
+        f2t: 'Faktury i KSEF (wFirma.pl)',
+        f2d: 'Wystawiaj i monitoruj faktury; integracja z KSEF przez wFirma.pl. Terminy płatności i eksporty gotowe do księgowości.',
+        f3t: 'Baza klientów i zgodność',
+        f3d: 'Zarządzanie klientami i integracja z GUS, rejestrem VAT. Przychody, VAT, wolumen i trendy wg klienta, usługi lub okresu.',
+        securityTitle: 'Twoje dane zostają u Ciebie',
+        securitySub: 'Dane są przechowywane lokalnie na Twoim komputerze. Bez wycieków—dane Twoje i Twoich klientów nie opuszczają Twojej kontroli. Praca offline, gdy trzeba.',
+        b1t: 'Stawki per klient:',
+        b1d: 'logika cenowa zgodna z Twoją praktyką.',
+        b2t: 'Reguły VAT wg usługi:',
+        b2d: 'obsługa kraj/UE/świat z wyjątkami.',
+        b3t: 'Pełna przejrzystość:',
+        b3d: 'statusy, terminy i stan faktur w jednym miejscu.',
+        ctaTitle: 'Zacznij pracę z JobRaven już dziś',
+        ctaText: 'Uruchom aplikację, skonfiguruj usługi i VAT, a następnie poprowadź kolejne zlecenie od początku do końca.',
+        footer: 'JobRaven • Desktop do zarządzania workflow tłumaczeń',
+        carouselPlaceholder: 'Zrzut ekranu 1',
+        carouselPlaceholder2: 'Zrzut ekranu 2',
+        carouselPlaceholder3: 'Zrzut ekranu 3'
+      }
+    }
+
+    const els = Array.from(document.querySelectorAll('[data-i18n]'))
+    const btnPl = document.getElementById('langPl')
+    const btnEn = document.getElementById('langEn')
+
+    function apply(lang) {
+      const safe = lang === 'pl' ? 'pl' : 'en'
+      document.documentElement.lang = safe
+      localStorage.setItem('jobraven_landing_lang', safe)
+      btnPl.classList.toggle('active', safe === 'pl')
+      btnEn.classList.toggle('active', safe === 'en')
+      for (const el of els) {
+        const key = el.getAttribute('data-i18n')
+        if (!key || !i18n[safe][key]) continue
+        el.textContent = i18n[safe][key]
+      }
+      document.title = safe === 'pl'
+        ? 'JobRaven – Workflow dla tłumaczy'
+        : 'JobRaven – Smart Translation Workflow'
+    }
+
+    btnPl.addEventListener('click', () => apply('pl'))
+    btnEn.addEventListener('click', () => apply('en'))
+
+    const q = new URLSearchParams(location.search).get('lang')
+    const stored = localStorage.getItem('jobraven_landing_lang')
+    const browserDefault = (navigator.language || '').toLowerCase().startsWith('pl') ? 'pl' : 'en'
+    const preferred = q === 'pl' || q === 'en'
+      ? q
+      : ((stored === 'pl' || stored === 'en') ? stored : browserDefault)
+    apply(preferred)
+
+    ;(function carousel() {
+      const inner = document.getElementById('carouselInner')
+      const dotsEl = document.getElementById('carouselDots')
+      const prevBtn = document.getElementById('carouselPrev')
+      const nextBtn = document.getElementById('carouselNext')
+      if (!inner || !dotsEl) return
+      const slides = inner.querySelectorAll('.carousel-slide')
+      const n = slides.length
+      if (n === 0) return
+      let idx = 0
+      function go(i) {
+        idx = (i + n) % n
+        inner.style.transform = 'translateX(-' + (idx * 100) + '%)'
+        dotsEl.querySelectorAll('.carousel-dot').forEach((d, j) => d.classList.toggle('active', j === idx))
+      }
+      for (let i = 0; i < n; i++) {
+        const dot = document.createElement('button')
+        dot.type = 'button'
+        dot.className = 'carousel-dot' + (i === 0 ? ' active' : '')
+        dot.setAttribute('aria-label', 'Slide ' + (i + 1))
+        dot.addEventListener('click', () => go(i))
+        dotsEl.appendChild(dot)
+      }
+      if (prevBtn) prevBtn.addEventListener('click', () => go(idx - 1))
+      if (nextBtn) nextBtn.addEventListener('click', () => go(idx + 1))
+    })()
+  </script>
+</body>
+</html>

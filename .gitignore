@@ -1,0 +1,29 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+dist-electron/
+release/
+# stary output tsc z electron/ – używany jest tylko build z Vite (dist-electron)
+electron/*.js
+!electron/build-config.generated.js
+
+# env (hasła, klucze)
+.env
+.env.local
+server/.env
+
+# logs
+*.log
+npm-debug.log*
+
+# system
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo

@@ -1,0 +1,388 @@
+/* Theme: default = system-friendly; high-contrast = accessibility */
+:root {
+  --color-bg: #fafafa;
+  --color-bg-secondary: #f0f0f0;
+  --color-surface: #ffffff;
+  --color-border: #e5e5e5;
+  --color-text: #171717;
+  --color-text-muted: #737373;
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-success: #16a34a;
+  --color-warning: #ca8a04;
+  --color-danger: #dc2626;
+  --color-link: #2563eb;
+  --color-nav-active: #eff6ff;
+  --color-nav-border: #e5e7eb;
+  --shadow: 0 1px 2px rgba(0,0,0,0.05);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #0c0c0c;
+    --color-bg-secondary: #111111;
+    --color-surface: #171717;
+    --color-border: #262626;
+    --color-text: #fafafa;
+    --color-text-muted: #a3a3a3;
+    --color-primary: #3b82f6;
+    --color-primary-hover: #2563eb;
+    --color-success: #22c55e;
+    --color-warning: #eab308;
+    --color-danger: #ef4444;
+    --color-link: #60a5fa;
+    --color-nav-active: #1e3a5f;
+    --color-nav-border: #262626;
+    --shadow: 0 1px 2px rgba(0,0,0,0.2);
+    color-scheme: dark;
+  }
+}
+
+[data-theme="high-contrast"] {
+  --color-bg: #000000;
+  --color-bg-secondary: #0a0a0a;
+  --color-surface: #0a0a0a;
+  --color-border: #ffffff;
+  --color-text: #ffffff;
+  --color-text-muted: #e0e0e0;
+  --color-primary: #60a5fa;
+  --color-primary-hover: #93c5fd;
+  --color-success: #4ade80;
+  --color-warning: #fde047;
+  --color-danger: #f87171;
+  --color-link: #93c5fd;
+  --color-nav-active: #1e293b;
+  --color-nav-border: #ffffff;
+  --shadow: none;
+  color-scheme: dark;
+}
+/* Wysoki kontrast: na jasnym tle zawsze czarny tekst, na ciemnym – biały */
+[data-theme="high-contrast"] button:not(.primary):not(.danger) {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+[data-theme="high-contrast"] button:not(.primary):not(.danger):hover {
+  background: #e5e5e5;
+  color: #000000;
+  border-color: #ffffff;
+}
+[data-theme="high-contrast"] .nav-tray {
+  background: #0a0a0a !important;
+  color: #ffffff;
+}
+[data-theme="high-contrast"] .nav-tray .nav-bar-btn {
+  color: #ffffff;
+}
+[data-theme="high-contrast"] .nav-tray .nav-bar-btn:hover {
+  background: #1e293b !important;
+  color: #ffffff;
+}
+[data-theme="high-contrast"] .badge.to_issue { background: #422006; color: #fde047; }
+[data-theme="high-contrast"] .badge.issued { background: #1e3a8a; color: #93c5fd; }
+[data-theme="high-contrast"] .badge.awaiting_payment { background: #422006; color: #fde047; }
+[data-theme="high-contrast"] .badge.overdue { background: #450a0a; color: #fca5a5; }
+[data-theme="high-contrast"] .badge.paid { background: #14532d; color: #4ade80; }
+[data-theme="high-contrast"] .badge.to_do { background: #ffffff; color: #000000; border: 1px solid #fff; }
+[data-theme="high-contrast"] .order-row-in-progress td { background: #0f172a; color: #93c5fd; }
+[data-theme="high-contrast"] .order-row-overdue td { background: #450a0a; color: #fca5a5; }
+[data-theme="high-contrast"] .order-row-overdue.order-row-in-progress td { background: #422006; color: #fde047; }
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  min-height: 100vh;
+}
+
+#root { min-height: 100vh; display: flex; flex-direction: column; }
+
+a { color: var(--color-link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+button.link-style {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+  color: var(--color-link);
+  text-decoration: underline;
+}
+button.link-style:hover { opacity: 0.85; }
+
+input, select, textarea {
+  font: inherit;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  background: var(--color-border);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 8px 14px;
+}
+button:hover { opacity: 0.9; filter: brightness(1.05); }
+button.primary {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+button.primary:hover { background: var(--color-primary-hover); border-color: var(--color-primary-hover); }
+button.danger {
+  background: var(--color-danger);
+  color: #fff;
+  border-color: var(--color-danger);
+}
+button.danger:hover { filter: brightness(1.1); }
+button.link-like {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-link);
+  text-decoration: none;
+}
+button.link-like:hover { text-decoration: underline; }
+
+label { display: block; margin-bottom: 2px; font-size: 0.875rem; color: var(--color-text-muted); }
+.form-group { margin-bottom: 0.5rem; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+@media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } }
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: var(--shadow);
+}
+
+.table-wrap { overflow-x: auto; scrollbar-gutter: stable both-edges; }
+.table-scroll-outer .table-wrap { scrollbar-width: none; }
+.table-scroll-outer .table-wrap::-webkit-scrollbar { display: none; }
+.table-scroll-bottom { position: sticky; bottom: 0; z-index: 5; background: var(--color-bg); flex-shrink: 0; }
+table { width: 100%; border-collapse: collapse; }
+/* Sticky + precyzyjne granice kolumn: separate daje stabilniejszy render niż collapse */
+table.repertorium-sections,
+table.custom-view-sections { border-collapse: separate; border-spacing: 0; }
+/* Księgi: table-layout fixed tylko gdy użytkownik zapisał szerokości (domyślnie auto = pełne nagłówki) */
+table.repertorium-sections.orderbook-fixed-cols,
+table.custom-view-sections.orderbook-fixed-cols { table-layout: fixed; }
+/* Tabela może być szersza niż widok – przewijanie poziome zamiast ściskania; wysokość z zawartości */
+table.repertorium-sections.orderbook-fixed-cols,
+table.custom-view-sections.orderbook-fixed-cols { width: 100%; min-width: max-content; height: auto; }
+table.repertorium-sections.orderbook-fixed-cols th .th-inner,
+table.custom-view-sections.orderbook-fixed-cols th .th-inner {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: normal;
+  word-break: keep-all;
+}
+/* Komórki body: pełna wysokość wiersza, treść się zawija – bez ucinania do jednej linii */
+table.repertorium-sections.orderbook-fixed-cols tbody td,
+table.custom-view-sections.orderbook-fixed-cols tbody td { overflow: visible; white-space: normal; vertical-align: top; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--color-border); }
+th { color: var(--color-text-muted); font-weight: 600; font-size: inherit; text-transform: uppercase; }
+table.repertorium-sections th,
+table.repertorium-sections td,
+table.custom-view-sections th,
+table.custom-view-sections td { font-size: 0.9rem; }
+/* Uchwyt do zmiany szerokości kolumny w księgach – widoczna krawędź, duży obszar klikalny */
+th .th-inner { display: block; padding-right: 4px; }
+th .col-resize-handle {
+  position: absolute; top: 0; right: 0; width: 4px; height: 100%;
+  cursor: col-resize; user-select: none; z-index: 10;
+  border-left: 1px solid transparent;
+}
+th .col-resize-handle:hover { background: var(--color-primary, #2563eb); opacity: 0.2; border-left-color: var(--color-primary); }
+th { position: relative; box-sizing: border-box; }
+/* Domyślnie kolumny danych w księgach mają min-width, żeby nie były zminimalizowane */
+table.repertorium-sections th:not([style*="width: 36"]):not([style*="min-width: 80"]),
+table.custom-view-sections th:not([style*="width: 36"]):not([style*="min-width: 80"]) { min-width: 90px; }
+body.col-resizing { user-select: none; cursor: col-resize; }
+body.col-resizing * { cursor: col-resize; }
+tr:hover td { background: var(--color-bg); }
+
+/* Wiersze księgi zleceń: w realizacji / po terminie – tylko jasne tła */
+.order-row-in-progress td { background: rgba(59, 130, 246, 0.06); }
+.order-row-overdue td { background: rgba(239, 68, 68, 0.06); }
+.order-row-overdue.order-row-in-progress td { background: rgba(245, 158, 11, 0.08); }
+.overdue-exclamation { color: var(--color-danger); font-size: 1rem; margin-right: 6px; font-weight: bold; }
+
+/* Repertorium: pionowe linie między sekcjami – przed written (5), między UWAGI i DATA (oral_date), między UWAGI i WYNAGRODZENIE (amount_net), przed refusal (32), status (35) */
+table.repertorium-sections tbody td:nth-child(5),
+table.repertorium-sections thead th:nth-child(5),
+table.repertorium-sections tbody td.repertorium-sep-before-oral,
+table.repertorium-sections thead th.repertorium-sep-before-oral,
+table.repertorium-sections tbody td.repertorium-sep-before-fees,
+table.repertorium-sections thead th.repertorium-sep-before-fees,
+table.repertorium-sections tbody td.repertorium-sep-before-refusal,
+table.repertorium-sections thead th.repertorium-sep-before-refusal,
+table.repertorium-sections tbody td.repertorium-sep-before-status,
+table.repertorium-sections thead th.repertorium-sep-before-status,
+table.repertorium-sections tbody td:nth-child(32),
+table.repertorium-sections tbody td:nth-child(35) { border-left: 2px solid var(--color-border); }
+
+/* Repertorium: przypięte kolumny – numer, data, zleceniodawca z lewej; akcje w osobnej kolumnie (bez przewijania pod spodem); nagłówki jak reszta */
+table.repertorium-sections .repertorium-sticky-left-0 { position: sticky; left: 0; z-index: 7; background: var(--color-bg); box-shadow: 2px 0 6px -2px rgba(0,0,0,0.12); background-clip: padding-box; }
+table.repertorium-sections .repertorium-sticky-left-1 { position: sticky; left: 36px; z-index: 7; background: var(--color-bg); box-shadow: 2px 0 6px -2px rgba(0,0,0,0.12); min-width: 100px; background-clip: padding-box; }
+table.repertorium-sections .repertorium-sticky-left-2 { position: sticky; left: 136px; z-index: 7; background: var(--color-bg); box-shadow: 2px 0 6px -2px rgba(0,0,0,0.12); min-width: 100px; background-clip: padding-box; }
+table.repertorium-sections .repertorium-sticky-left-3 { position: sticky; left: 236px; z-index: 7; background: var(--color-bg); box-shadow: 2px 0 6px -2px rgba(0,0,0,0.12); min-width: 220px; background-clip: padding-box; }
+table.repertorium-sections .repertorium-sticky-left-header { position: sticky; left: 36px; z-index: 8; background: var(--color-surface); box-shadow: 2px 0 6px -2px rgba(0,0,0,0.12); background-clip: padding-box; }
+table.repertorium-sections thead .repertorium-sticky-left-0,
+table.repertorium-sections thead .repertorium-sticky-left-1,
+table.repertorium-sections thead .repertorium-sticky-left-2,
+table.repertorium-sections thead .repertorium-sticky-left-3 { z-index: 8; background: var(--color-surface); }
+table.repertorium-sections thead th,
+table.custom-view-sections thead th { background: var(--color-surface); }
+table.repertorium-sections tr:hover .repertorium-sticky-left-0,
+table.repertorium-sections tr:hover .repertorium-sticky-left-1,
+table.repertorium-sections tr:hover .repertorium-sticky-left-2,
+table.repertorium-sections tr:hover .repertorium-sticky-left-3 { background: var(--color-bg); }
+table.repertorium-sections .order-row-in-progress .repertorium-sticky-left-0,
+table.repertorium-sections .order-row-in-progress .repertorium-sticky-left-1,
+table.repertorium-sections .order-row-in-progress .repertorium-sticky-left-2,
+table.repertorium-sections .order-row-in-progress .repertorium-sticky-left-3 { background: rgba(59, 130, 246, 0.06); }
+table.repertorium-sections .order-row-overdue .repertorium-sticky-left-0,
+table.repertorium-sections .order-row-overdue .repertorium-sticky-left-1,
+table.repertorium-sections .order-row-overdue .repertorium-sticky-left-2,
+table.repertorium-sections .order-row-overdue .repertorium-sticky-left-3 { background: rgba(239, 68, 68, 0.06); }
+table.repertorium-sections .order-row-overdue.order-row-in-progress .repertorium-sticky-left-0,
+table.repertorium-sections .order-row-overdue.order-row-in-progress .repertorium-sticky-left-1,
+table.repertorium-sections .order-row-overdue.order-row-in-progress .repertorium-sticky-left-2,
+table.repertorium-sections .order-row-overdue.order-row-in-progress .repertorium-sticky-left-3 { background: rgba(245, 158, 11, 0.08); }
+
+/* Repertorium: suwak poziomy przyklejony do stopki ekranu (sticky bottom), zawsze widoczny; rezerwa 14px na dole obszaru przewijania = suwak nakłada się tylko na pusty pas, wiersze nie wjeżdżają pod niego */
+.repertorium-sticky-layout { display: flex; width: 100%; align-items: flex-start; flex-wrap: nowrap; }
+.repertorium-sticky-layout .repertorium-scroll-part { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; padding-bottom: 0; margin-bottom: 0; }
+.repertorium-sticky-layout .repertorium-scroll-part .card.table-wrap { padding-left: 0; padding-right: 0; padding-bottom: 14px; flex: 1; min-height: 0; overflow-y: auto; border-bottom: none; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.repertorium-sticky-layout .repertorium-scroll-part .table-scroll-bottom { position: sticky; bottom: 0; z-index: 5; margin: 0; padding: 0; flex-shrink: 0; line-height: 0; min-height: 14px; height: 14px; box-sizing: border-box; border-radius: 0; background: var(--color-bg); }
+.repertorium-sticky-layout .repertorium-scroll-part .table-scroll-bottom * { line-height: 0; }
+.repertorium-sticky-layout .repertorium-actions-col { flex: 0 0 auto; width: 80px; min-width: 80px; border-left: 1px solid var(--color-border); overflow: visible; }
+.repertorium-sticky-layout .repertorium-actions-col table { width: 100%; border-collapse: collapse; table-layout: fixed; overflow: visible; }
+.repertorium-sticky-layout .repertorium-actions-col th,
+.repertorium-sticky-layout .repertorium-actions-col td { text-align: left; padding: 8px 8px; border-bottom: 1px solid var(--color-border); vertical-align: middle; box-sizing: border-box; }
+.repertorium-sticky-layout .repertorium-actions-col th { color: var(--color-text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; }
+.repertorium-sticky-layout .repertorium-actions-col .repertorium-actions-cell { line-height: 1.2; padding: 8px 8px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; overflow: visible; vertical-align: middle; position: relative; }
+.repertorium-sticky-layout .repertorium-actions-col .repertorium-actions-dropdown-wrap { position: relative; display: flex; justify-content: center; align-items: center; }
+.repertorium-sticky-layout .repertorium-actions-col .repertorium-actions-trigger { font-size: 0.8rem; padding: 6px 12px; white-space: nowrap; background: var(--color-surface-elevated, #f4f4f5); border: 1px solid var(--color-border); border-radius: 6px; cursor: pointer; color: var(--color-text); }
+.repertorium-sticky-layout .repertorium-actions-col .repertorium-actions-trigger:hover { background: var(--color-bg); }
+.repertorium-sticky-layout .repertorium-actions-col .repertorium-actions-trigger.actions-dots-trigger { padding: 6px 10px; font-size: 1.1rem; line-height: 1; }
+.repertorium-sticky-layout .repertorium-actions-col .repertorium-actions-trigger.actions-dots-trigger .actions-dots { display: block; }
+/* Wspólny dropdown akcji (ikona ⋯) – tabele: księgi, faktury, wykonawcy, klienci, umowy; menu w portalu z z-index na wierzchu */
+.actions-dropdown-wrap { position: relative; display: inline-block; }
+.actions-dots-trigger { padding: 6px 10px; font-size: 1.1rem; line-height: 1; background: var(--color-surface-elevated, #f4f4f5); border: 1px solid var(--color-border); border-radius: 6px; cursor: pointer; color: var(--color-text); }
+.actions-dots-trigger:hover { background: var(--color-bg); }
+.actions-dots-trigger .actions-dots { display: block; font-weight: bold; letter-spacing: 0.05em; }
+.actions-dropdown { position: fixed; margin-top: 4px; min-width: 160px; padding: 6px; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.2); z-index: 10000; display: flex; flex-direction: column; gap: 2px; }
+.actions-dropdown button { display: block; width: 100%; text-align: left; padding: 8px 12px; font-size: 0.8rem; border: none; border-radius: 4px; cursor: pointer; background: transparent; color: var(--color-text); }
+.actions-dropdown button:hover { background: var(--color-surface-elevated, #f4f4f5); }
+.actions-dropdown button.primary { background: var(--color-primary, #2563eb); color: #fff; }
+.actions-dropdown button.primary:hover { background: var(--color-primary-hover, #1d4ed8); }
+.actions-dropdown button.danger { color: var(--color-danger); }
+.actions-dropdown button.danger:hover { background: rgba(239, 68, 68, 0.1); }
+.repertorium-sticky-layout .repertorium-actions-col .repertorium-actions-dropdown { position: fixed; margin-top: 4px; min-width: 160px; padding: 6px; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.2); z-index: 10000; display: flex; flex-direction: column; gap: 2px; }
+.repertorium-sticky-layout .repertorium-actions-col .repertorium-actions-dropdown button { display: block; width: 100%; text-align: left; padding: 8px 12px; font-size: 0.8rem; border: none; border-radius: 4px; cursor: pointer; background: transparent; color: var(--color-text); }
+.repertorium-sticky-layout .repertorium-actions-col .repertorium-actions-dropdown button:hover { background: var(--color-surface-elevated, #f4f4f5); }
+.repertorium-sticky-layout .repertorium-actions-col .repertorium-actions-dropdown button.primary { background: var(--color-primary, #2563eb); color: #fff; }
+.repertorium-sticky-layout .repertorium-actions-col .repertorium-actions-dropdown button.primary:hover { background: var(--color-primary-hover, #1d4ed8); }
+.repertorium-sticky-layout .repertorium-actions-col .repertorium-actions-dropdown button.danger { color: var(--color-danger); }
+.repertorium-sticky-layout .repertorium-actions-col .repertorium-actions-dropdown button.danger:hover { background: rgba(239, 68, 68, 0.1); }
+.repertorium-sticky-layout .repertorium-actions-col tr:hover td { background: var(--color-bg); }
+.repertorium-sticky-layout .repertorium-actions-col .order-row-in-progress td { background: rgba(59, 130, 246, 0.06); }
+.repertorium-sticky-layout .repertorium-actions-col .order-row-overdue td { background: rgba(239, 68, 68, 0.06); }
+.repertorium-sticky-layout .repertorium-actions-col .order-row-overdue.order-row-in-progress td { background: rgba(245, 158, 11, 0.08); }
+
+/* Księga niestandardowa (uproszczony/własny): tylko nr zlecenia przypięty z lewej, slider na dole, akcje w osobnej kolumnie */
+table.custom-view-sections .custom-sticky-left-0 { position: sticky; left: 0; z-index: 7; background: var(--color-bg); box-shadow: 2px 0 6px -2px rgba(0,0,0,0.12); background-clip: padding-box; }
+table.custom-view-sections .custom-sticky-left-1 { position: sticky; left: 36px; z-index: 7; background: var(--color-bg); box-shadow: 2px 0 6px -2px rgba(0,0,0,0.12); min-width: 100px; background-clip: padding-box; }
+table.custom-view-sections thead .custom-sticky-left-0,
+table.custom-view-sections thead .custom-sticky-left-1 { z-index: 8; background: var(--color-surface); }
+table.custom-view-sections tr:hover .custom-sticky-left-0,
+table.custom-view-sections tr:hover .custom-sticky-left-1 { background: var(--color-bg); }
+table.custom-view-sections .order-row-in-progress .custom-sticky-left-0,
+table.custom-view-sections .order-row-in-progress .custom-sticky-left-1 { background: rgba(59, 130, 246, 0.06); }
+table.custom-view-sections .order-row-overdue .custom-sticky-left-0,
+table.custom-view-sections .order-row-overdue .custom-sticky-left-1 { background: rgba(239, 68, 68, 0.06); }
+table.custom-view-sections .order-row-overdue.order-row-in-progress .custom-sticky-left-0,
+table.custom-view-sections .order-row-overdue.order-row-in-progress .custom-sticky-left-1 { background: rgba(245, 158, 11, 0.08); }
+
+.custom-view-sticky-layout { display: flex; width: 100%; align-items: flex-start; flex-wrap: nowrap; }
+.custom-view-sticky-layout .custom-scroll-part { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; padding-bottom: 0; margin-bottom: 0; }
+.custom-view-sticky-layout .custom-scroll-part .card.table-wrap { padding-left: 0; padding-right: 0; padding-bottom: 14px; flex: 1; min-height: 0; overflow-y: auto; border-bottom: none; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.custom-view-sticky-layout .custom-scroll-part .table-scroll-bottom { position: sticky; bottom: 0; z-index: 5; margin: 0; padding: 0; flex-shrink: 0; line-height: 0; min-height: 14px; height: 14px; box-sizing: border-box; border-radius: 0; background: var(--color-bg); }
+.custom-view-sticky-layout .custom-scroll-part .table-scroll-bottom * { line-height: 0; }
+.custom-view-sticky-layout .custom-actions-col { flex: 0 0 auto; width: 80px; min-width: 80px; border-left: 1px solid var(--color-border); overflow: visible; }
+.custom-view-sticky-layout .custom-actions-col table { width: 100%; border-collapse: collapse; table-layout: fixed; overflow: visible; }
+.custom-view-sticky-layout .custom-actions-col th,
+.custom-view-sticky-layout .custom-actions-col td { text-align: left; padding: 8px 8px; border-bottom: 1px solid var(--color-border); vertical-align: middle; box-sizing: border-box; }
+.custom-view-sticky-layout .custom-actions-col th { color: var(--color-text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; }
+.custom-view-sticky-layout .custom-actions-col .custom-actions-cell { line-height: 1.2; padding: 8px 8px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; overflow: visible; vertical-align: middle; position: relative; }
+.custom-view-sticky-layout .custom-actions-col .custom-actions-dropdown-wrap { position: relative; display: flex; justify-content: center; align-items: center; }
+.custom-view-sticky-layout .custom-actions-col .custom-actions-trigger { font-size: 0.8rem; padding: 6px 12px; white-space: nowrap; background: var(--color-surface-elevated, #f4f4f5); border: 1px solid var(--color-border); border-radius: 6px; cursor: pointer; color: var(--color-text); }
+.custom-view-sticky-layout .custom-actions-col .custom-actions-trigger:hover { background: var(--color-bg); }
+.custom-view-sticky-layout .custom-actions-col .custom-actions-trigger.actions-dots-trigger { padding: 6px 10px; font-size: 1.1rem; line-height: 1; }
+.custom-view-sticky-layout .custom-actions-col .custom-actions-trigger.actions-dots-trigger .actions-dots { display: block; }
+.custom-view-sticky-layout .custom-actions-col .custom-actions-dropdown { position: fixed; margin-top: 4px; min-width: 160px; padding: 6px; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.2); z-index: 10000; display: flex; flex-direction: column; gap: 2px; }
+.custom-view-sticky-layout .custom-actions-col .custom-actions-dropdown button { display: block; width: 100%; text-align: left; padding: 8px 12px; font-size: 0.8rem; border: none; border-radius: 4px; cursor: pointer; background: transparent; color: var(--color-text); }
+.custom-view-sticky-layout .custom-actions-col .custom-actions-dropdown button:hover { background: var(--color-surface-elevated, #f4f4f5); }
+.custom-view-sticky-layout .custom-actions-col .custom-actions-dropdown button.primary { background: var(--color-primary, #2563eb); color: #fff; }
+.custom-view-sticky-layout .custom-actions-col .custom-actions-dropdown button.primary:hover { background: var(--color-primary-hover, #1d4ed8); }
+.custom-view-sticky-layout .custom-actions-col .custom-actions-dropdown button.danger { color: var(--color-danger); }
+.custom-view-sticky-layout .custom-actions-col .custom-actions-dropdown button.danger:hover { background: rgba(239, 68, 68, 0.1); }
+.custom-view-sticky-layout .custom-actions-col tr:hover td { background: var(--color-bg); }
+.custom-view-sticky-layout .custom-actions-col .order-row-in-progress td { background: rgba(59, 130, 246, 0.06); }
+.custom-view-sticky-layout .custom-actions-col .order-row-overdue td { background: rgba(239, 68, 68, 0.06); }
+.custom-view-sticky-layout .custom-actions-col .order-row-overdue.order-row-in-progress td { background: rgba(245, 158, 11, 0.08); }
+
+/* Badges – nowoczesne kolory dla statusów */
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 500; }
+.badge.to_do { background: var(--color-border); color: var(--color-text); }
+.badge.in_progress { background: #dbeafe; color: #1d4ed8; }
+[data-theme="high-contrast"] .badge.in_progress { background: #1e3a8a; color: #93c5fd; }
+.badge.completed { background: #dcfce7; color: #166534; }
+[data-theme="high-contrast"] .badge.completed { background: #14532d; color: #4ade80; }
+.badge.cancelled { background: #fef2f2; color: #991b1b; }
+[data-theme="high-contrast"] .badge.cancelled { background: #450a0a; color: #fca5a5; }
+.badge.to_issue { background: #fffbeb; color: #b45309; }
+.badge.issued { background: #dbeafe; color: #1e40af; }
+.badge.awaiting_payment { background: #fef3c7; color: #b45309; }
+.badge.overdue { background: #fee2e2; color: var(--color-danger); }
+.badge.paid { background: #dcfce7; color: #166534; }
+
+/* Top bar nav buttons – hover and active */
+.nav-bar-btn {
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.nav-bar-btn:hover {
+  background: rgba(59, 130, 246, 0.12) !important;
+  color: var(--color-text);
+}
+[data-theme="high-contrast"] .nav-bar-btn:hover {
+  background: rgba(96, 165, 250, 0.2) !important;
+}
+.nav-bar-btn[aria-current="page"] {
+  border-bottom: 2px solid var(--color-primary);
+}
+
+/* Komunikaty i wyróżnienia */
+.msg-success { color: var(--color-success); }
+.msg-warning { color: var(--color-warning); }
+.msg-error { color: var(--color-danger); }
+.msg-info { color: var(--color-primary); }

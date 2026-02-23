@@ -212,6 +212,9 @@ const landingIndex = path.join(__dirname, 'public', 'landing', 'index.html')
 app.get('/landing', (req, res) => res.sendFile(landingIndex))
 app.get('/landing/', (req, res) => res.sendFile(landingIndex))
 app.use('/landing', express.static(path.join(__dirname, 'public', 'landing')))
+app.use('/screenshots', express.static(path.join(__dirname, 'public', 'landing', 'screenshots')))
+app.get('/logo_trans.png', (req, res) => res.sendFile(path.join(__dirname, 'public', 'landing', 'logo_trans.png')))
+app.get('/logo-horizontal_transp.png', (req, res) => res.sendFile(path.join(__dirname, 'public', 'landing', 'logo-horizontal_transp.png')))
 
 // Strona resetu hasła (link z e-maila) – treść zależna od lang w query
 app.get('/reset-password', (req, res) => {
@@ -566,6 +569,48 @@ app.get('/api/admin/organizations', adminAuth, (req, res) => {
   }
 })
 
+// Mailing do użytkowników (panel admina)
+app.post('/api/admin/mailing', adminAuth, async (req, res) => {
+  try {
+    const { to, emails: emailsParam, subject, bodyHtml, bodyText } = req.body || {}
+    const sub = (typeof subject === 'string' ? subject : '').trim()
+    const html = typeof bodyHtml === 'string' ? bodyHtml : ''
+    const text = typeof bodyText === 'string' ? bodyText : (html ? html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '')
+    if (!sub) return res.status(400).json({ ok: false, error: 'Podaj temat (subject).' })
+    if (!html && !text) return res.status(400).json({ ok: false, error: 'Podaj treść (bodyHtml lub bodyText).' })
+
+    const allUsers = getUsersWithLicenses()
+    let recipients = []
+    if (to === 'all') {
+      recipients = allUsers.map(u => (u.email || '').trim()).filter(Boolean)
+    } else if (to === 'selected' && Array.isArray(emailsParam)) {
+      const set = new Set(emailsParam.map(e => String(e).trim().toLowerCase()).filter(Boolean))
+      recipients = allUsers.map(u => (u.email || '').trim()).filter(e => set.has(e.toLowerCase()))
+    } else {
+      return res.status(400).json({ ok: false, error: 'Podaj to: "all" lub "selected" oraz emails (tablica adresów).' })
+    }
+
+    if (recipients.length === 0) {
+      return res.json({ ok: true, sent: 0, message: 'Brak adresatów do wysłania.' })
+    }
+
+    const results = { sent: 0, failed: [] }
+    for (const email of recipients) {
+      try {
+        await sendMail(email, sub, html || text, text || undefined)
+        results.sent++
+      } catch (err) {
+        console.error('[Mailing] Błąd wysyłki na', email, err && err.message)
+        results.failed.push({ email, error: err && err.message || String(err) })
+      }
+    }
+    res.json({ ok: true, sent: results.sent, failed: results.failed, total: recipients.length })
+  } catch (err) {
+    console.error('Admin mailing error:', err)
+    res.status(500).json({ ok: false, error: 'SERVER_ERROR', detail: err && err.message || String(err) })
+  }
+})
+
 // Wysyłka maila testowego (panel admina / diagnostyka SMTP)
 app.post('/api/admin/send-test-email', adminAuth, async (req, res) => {
   try {
@@ -676,4 +721,5 @@ app.use('/api', (req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`JobRaven server: nasłuch na porcie ${PORT} (0.0.0.0)`)
   console.log(`Panel admina: /admin`)
+  console.log(`Landing (localhost): http://localhost:${PORT}/landing`)
 })
