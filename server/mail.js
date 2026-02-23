@@ -1,16 +1,21 @@
 /**
  * Wysyłka e-maili (weryfikacja, reset hasła).
- * Na Railway używaj Mailgun API (HTTPS) – porty SMTP 587/465 są blokowane na planach Free/Hobby.
- * Lokalnie możesz używać SMTP (np. dpoczta.pl) lub Mailgun API.
+ *
+ * PRODUKCJA (Railway itp.): używaj WYŁĄCZNIE Mailgun API (MAILGUN_API_KEY, MAILGUN_DOMAIN).
+ * Nie ustawiaj zmiennych SMTP na Railway – unikasz ekspozycji i problemów z blokowanymi portami.
+ *
+ * LOKALNIE: możesz użyć Mailgun API albo SMTP (np. dpoczta.pl, Gmail) – zmienne JOBRAVEN_SMTP_*.
+ * Plik .env z hasłami NIE może być commitowany (jest w .gitignore).
  */
 const nodemailer = require('nodemailer')
 
 const MAIL_FROM = process.env.MAIL_FROM || process.env.JOBRAVEN_MAIL_FROM || 'noreply@jobraven.local'
 const BASE_URL = process.env.BASE_URL || process.env.JOBRAVEN_BASE_URL || 'http://localhost:3000'
 
-// Mailgun API (HTTPS) – działa na Railway; nie wymaga portów SMTP
+const isProduction = !!(process.env.RAILWAY_ENVIRONMENT || process.env.RENDER || (process.env.NODE_ENV === 'production'))
+
+// Mailgun API (HTTPS) – jedyna zalecana metoda na Railway/produkcji
 const MAILGUN_API_KEY_RAW = (process.env.MAILGUN_API_KEY || process.env.JOBRAVEN_MAILGUN_API_KEY || '').trim()
-// Nowe klucze Mailgun mają format z myślnikami (np. xxx-xxxxxxxx-xxxxxxxx) – używaj as-is. Stare klucze (krótki hex) dopisz key-.
 const MAILGUN_API_KEY = MAILGUN_API_KEY_RAW
   ? (MAILGUN_API_KEY_RAW.startsWith('key-') || MAILGUN_API_KEY_RAW.includes('-')
     ? MAILGUN_API_KEY_RAW
@@ -19,16 +24,18 @@ const MAILGUN_API_KEY = MAILGUN_API_KEY_RAW
 const MAILGUN_DOMAIN = (process.env.MAILGUN_DOMAIN || process.env.JOBRAVEN_MAILGUN_DOMAIN || '').trim()
 const useMailgunApi = !!(MAILGUN_API_KEY && MAILGUN_DOMAIN)
 
-const SMTP_HOST_RAW = process.env.SMTP_HOST || process.env.JOBRAVEN_SMTP_HOST
+// SMTP – tylko lokalnie; na produkcji NIE czytamy zmiennych SMTP (bezpieczeństwo, brak ekspozycji)
+const useSmtpAllowed = !isProduction
+const SMTP_HOST_RAW = useSmtpAllowed ? (process.env.SMTP_HOST || process.env.JOBRAVEN_SMTP_HOST) : ''
 const SMTP_HOST = typeof SMTP_HOST_RAW === 'string' ? SMTP_HOST_RAW.replace(/:[\d]+$/, '').trim() : ''
-const SMTP_PORT = parseInt(process.env.SMTP_PORT || process.env.JOBRAVEN_SMTP_PORT || '587', 10)
+const SMTP_PORT = parseInt(useSmtpAllowed ? (process.env.SMTP_PORT || process.env.JOBRAVEN_SMTP_PORT || '587') : '587', 10)
 const SMTP_SECURE = process.env.SMTP_SECURE === '1' || process.env.SMTP_SECURE === 'true'
-const SMTP_USER = process.env.SMTP_USER || process.env.JOBRAVEN_SMTP_USER
-const SMTP_PASS = process.env.SMTP_PASS || process.env.JOBRAVEN_SMTP_PASS
+const SMTP_USER = useSmtpAllowed ? (process.env.SMTP_USER || process.env.JOBRAVEN_SMTP_USER) : ''
+const SMTP_PASS = useSmtpAllowed ? (process.env.SMTP_PASS || process.env.JOBRAVEN_SMTP_PASS) : ''
 const SMTP_INSECURE = process.env.JOBRAVEN_SMTP_INSECURE === '1' || process.env.SMTP_INSECURE === '1'
 
 let transporter = null
-if (!useMailgunApi && SMTP_HOST && SMTP_USER && SMTP_PASS) {
+if (!useMailgunApi && useSmtpAllowed && SMTP_HOST && SMTP_USER && SMTP_PASS) {
   const isPort587 = SMTP_PORT === 587
   transporter = nodemailer.createTransport({
     host: SMTP_HOST.trim(),
@@ -38,9 +45,11 @@ if (!useMailgunApi && SMTP_HOST && SMTP_USER && SMTP_PASS) {
     auth: { user: SMTP_USER, pass: SMTP_PASS },
     tls: { rejectUnauthorized: !SMTP_INSECURE }
   })
-  console.log('[Mail] SMTP skonfigurowany:', SMTP_HOST + ':' + SMTP_PORT)
+  console.log('[Mail] SMTP skonfigurowany (lokalnie):', SMTP_HOST + ':' + SMTP_PORT)
 } else if (useMailgunApi) {
   console.log('[Mail] Mailgun API skonfigurowany (domena:', MAILGUN_DOMAIN + ')')
+} else if (isProduction) {
+  console.log('[Mail] Produkcja bez Mailgun – ustaw MAILGUN_API_KEY i MAILGUN_DOMAIN w zmiennych środowiskowych')
 } else {
   console.log('[Mail] Mail nie skonfigurowany – linki będą w konsoli serwera')
 }

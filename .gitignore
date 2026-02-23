@@ -5,6 +5,7 @@ node_modules/
 dist/
 dist-electron/
 release/
+deploy/
 # stary output tsc z electron/ – używany jest tylko build z Vite (dist-electron)
 electron/*.js
 !electron/build-config.generated.js

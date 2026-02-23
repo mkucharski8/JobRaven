@@ -39,8 +39,8 @@ Domenę możesz zostawić w dhosting i w ustawieniach DNS ustawić rekord A na I
    - `BASE_URL` = później wstawisz tutaj URL serwisu (np. `https://twoja-nazwa.up.railway.app`) – możesz to zrobić po pierwszym deployu, gdy Railway pokaże domenę.
    - `JOBRAVEN_ADMIN_PASSWORD_HASH` = hash hasła do panelu admina (wygeneruj lokalnie:  
      `node -e "const c=require('crypto'); const s='jobraven-admin-2025'; console.log(c.scryptSync('TWOJE_HASLO', s, 64).toString('hex'))"`).
-   - **SMTP** (żeby rejestracja wysyłała mail weryfikacyjny): `JOBRAVEN_SMTP_HOST`, `JOBRAVEN_SMTP_PORT`, `JOBRAVEN_SMTP_USER`, `JOBRAVEN_SMTP_PASS`, `JOBRAVEN_MAIL_FROM`. Bez SMTP rejestracja się nie uda (błąd wysyłki maila).  
-     **Gmail na Railway:** ustaw zmienne jak w sekcji „SMTP Gmail (Railway)” poniżej; przy Gmailu **nie ustawiaj** `MAILGUN_API_KEY` ani `MAILGUN_DOMAIN`, żeby serwer użył SMTP.
+   - **Maile (obowiązkowo na Railway):** używaj **wyłącznie Mailgun API** – `MAILGUN_API_KEY` (lub `JOBRAVEN_MAILGUN_API_KEY`), `MAILGUN_DOMAIN` (lub `JOBRAVEN_MAILGUN_DOMAIN`), `JOBRAVEN_MAIL_FROM`. Bez tego rejestracja i reset hasła nie będą wysyłać maili.  
+     **Na Railway NIE ustawiaj zmiennych SMTP** (`JOBRAVEN_SMTP_*`) – serwer w produkcji ich nie czyta (bezpieczeństwo, uniknięcie ekspozycji), a porty 587/465 są tam i tak zablokowane. Zob. sekcja „Mailgun na Railway” poniżej.
 
    **PORT** nie ustawiaj – Railway ustawia go automatycznie.
 
@@ -63,7 +63,7 @@ Domenę możesz zostawić w dhosting i w ustawieniach DNS ustawić rekord A na I
 8. **W aplikacji desktop:**  
    W **Ustawieniach** wpisz adres serwera auth: `https://twoja-domena.up.railway.app` (bez `/` na końcu). Zaloguj się (po seedzie: np. konto z `server/store.js` lub zarejestruj nowe).
 
-**Podsumowanie – co utworzyć na Railway:** jeden **Project**, w nim jedna **Service** z GitHub repo; w serwisie: Root Directory = `server`, Variables (JWT, BASE_URL, ADMIN_PASSWORD_HASH), Volume (mount path `data`), wygenerowana domena.
+**Podsumowanie – co utworzyć na Railway:** jeden **Project**, w nim jedna **Service** z GitHub repo; w serwisie: Root Directory = `server`, Variables (JWT, BASE_URL, ADMIN_PASSWORD_HASH, **Mailgun API** – nie SMTP), Volume (mount path `data`), wygenerowana domena.
 
 ### Redeploy z lokalnego folderu (bez GitHub)
 
@@ -85,19 +85,18 @@ Domenę możesz zostawić w dhosting i w ustawieniach DNS ustawić rekord A na I
 
 Pliki z `server/` (w tym `public/admin/`, landing) są pakowane i wysyłane na Railway; build i start jak zwykle (`npm install`, `npm start`). Działa ten sam serwis co przy deployu z GitHub – tylko źródło kodu jest lokalne.
 
-### SMTP Gmail (Railway)
+### Mailgun na Railway (wysyłka maili)
 
-Żeby na Railway wysyłać maile przez Gmail (np. tymczasowo zamiast Mailgun), w **Variables** serwisu ustaw:
+Na Railway **używaj tylko Mailgun API** do wysyłki maili (weryfikacja e-mail, reset hasła). Zmienne SMTP na Railway **nie są obsługiwane** (serwer w trybie produkcji ich nie czyta – unikamy ekspozycji; porty 587/465 są zablokowane).
 
-| Zmienna | Wartość |
-|--------|---------|
-| `JOBRAVEN_SMTP_HOST` | `smtp.gmail.com` |
-| `JOBRAVEN_SMTP_PORT` | `587` |
-| `JOBRAVEN_SMTP_USER` | adres Gmail (np. `twoj@gmail.com`) |
-| `JOBRAVEN_SMTP_PASS` | hasło aplikacji Gmail (Konto Google → Bezpieczeństwo → Hasła aplikacji) |
-| `JOBRAVEN_MAIL_FROM` | ten sam adres co `JOBRAVEN_SMTP_USER` |
+1. Załóż konto w [Mailgun](https://www.mailgun.com/), dodaj domenę (lub użyj domeny sandbox).
+2. W Mailgun: **Sending** → **Domain** → skopiuj **Private API key** i nazwę domeny (np. `sandboxXXX.mailgun.org`).
+3. W Railway w **Variables** serwisu ustaw:
+   - `MAILGUN_API_KEY` lub `JOBRAVEN_MAILGUN_API_KEY` = klucz API (np. `key-xxxxxxxx` lub nowy format z myślnikami)
+   - `MAILGUN_DOMAIN` lub `JOBRAVEN_MAILGUN_DOMAIN` = np. `sandboxXXX.mailgun.org`
+   - `JOBRAVEN_MAIL_FROM` = np. `JobRaven <postmaster@sandboxXXX.mailgun.org>`
 
-**Nie ustawiaj** `MAILGUN_API_KEY` ani `MAILGUN_DOMAIN` – wtedy serwer użyje SMTP zamiast Mailgun.
+**Lokalnie** możesz zamiast Mailgun użyć SMTP (plik `.env` w `server/` – **nigdy nie commituj tego pliku**). Na Railway – tylko Mailgun.
 
 ---
 
@@ -106,7 +105,7 @@ Pliki z `server/` (w tym `public/admin/`, landing) są pakowane i wysyłane na R
 - **Node.js** 18+ (LTS)
 - **Domena** wskazująca na serwer (zalecane – HTTPS i maile z poprawnymi linkami)
 - **HTTPS** – aplikacja i przeglądarka łączą się z API; w produkcji używaj wyłącznie `https://`
-- **SMTP** – potrzebne do rejestracji (mail weryfikacyjny) i resetu hasła. Bez SMTP rejestracja zwraca błąd „wysyłka maila nie powiodła się”, a użytkownik nie jest tworzony.
+- **Wysyłka maili** – na Railway: **Mailgun API** (zmienne `MAILGUN_*`). Na VPS: SMTP lub Mailgun. Bez tego rejestracja i reset hasła nie wyślą maila.
 
 ---
 

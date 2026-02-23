@@ -151,20 +151,20 @@ ${body}
   })
 })
 
-// Diagnostyka: sprawdzenie połączenia + wysłanie maila testowego na mkucharski8@gmail.com
-const SMTP_CHECK_TEST_EMAIL = 'mkucharski8@gmail.com'
-app.get('/api/smtp-check', async (req, res) => {
+// Diagnostyka: sprawdzenie połączenia mail (Mailgun lub lokalnie SMTP) + wysłanie maila testowego
+const MAIL_CHECK_TEST_EMAIL = 'mkucharski8@gmail.com'
+async function handleMailCheck(req, res) {
   try {
     const result = await verifySmtpConnection()
     if (result.ok) {
       try {
         await sendMail(
-          SMTP_CHECK_TEST_EMAIL,
+          MAIL_CHECK_TEST_EMAIL,
           'JobRaven – test wysyłki',
-          '<p>To jest test wysyłki z serwera JobRaven (endpoint /api/smtp-check).</p><p>Jeśli to widzisz, maile działają.</p>',
-          'To jest test wysyłki z serwera JobRaven (endpoint /api/smtp-check). Jeśli to widzisz, maile działają.'
+          '<p>To jest test wysyłki z serwera JobRaven.</p><p>Jeśli to widzisz, maile działają.</p>',
+          'To jest test wysyłki z serwera JobRaven. Jeśli to widzisz, maile działają.'
         )
-        result.sentTestTo = SMTP_CHECK_TEST_EMAIL
+        result.sentTestTo = MAIL_CHECK_TEST_EMAIL
       } catch (mailErr) {
         result.sentTestTo = null
         result.sendTestError = mailErr && mailErr.message || String(mailErr)
@@ -174,7 +174,9 @@ app.get('/api/smtp-check', async (req, res) => {
   } catch (err) {
     res.status(500).json({ ok: false, error: err && err.message || String(err) })
   }
-})
+}
+app.get('/api/mail-check', handleMailCheck)
+app.get('/api/smtp-check', handleMailCheck) // alias dla wstecznej kompatybilności
 
 function adminAuth(req, res, next) {
   const key = req.query.key || req.get('X-Admin-Key')
@@ -611,13 +613,13 @@ app.post('/api/admin/mailing', adminAuth, async (req, res) => {
   }
 })
 
-// Wysyłka maila testowego (panel admina / diagnostyka SMTP)
+// Wysyłka maila testowego (panel admina / diagnostyka Mailgun lub SMTP)
 app.post('/api/admin/send-test-email', adminAuth, async (req, res) => {
   try {
     const to = (req.body && req.body.to) ? String(req.body.to).trim() : ''
     if (!to) return res.status(400).json({ ok: false, error: 'Podaj adres (pole to).' })
-    const html = '<p>To jest test wysyłki z serwera JobRaven. Jeśli to widzisz, SMTP działa poprawnie.</p>'
-    await sendMail(to, 'Test JobRaven – SMTP', html)
+    const html = '<p>To jest test wysyłki z serwera JobRaven. Jeśli to widzisz, wysyłka maili działa poprawnie.</p>'
+    await sendMail(to, 'Test JobRaven – wysyłka maili', html)
     res.json({ ok: true, message: 'Wysłano mail testowy na ' + to })
   } catch (err) {
     console.error('Test email error:', err)
