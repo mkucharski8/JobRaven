@@ -1,0 +1,10 @@
+# Zmniejszenie uploadu i unikanie plików mogących wywołać 403
+node_modules/
+data/
+.env
+.env.local
+.env.*
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db

@@ -1,0 +1,29 @@
+﻿# Zaleznosci i build (duze / generowane)
+node_modules/**
+release/**
+dist/**
+dist-electron/**
+.git/**
+
+# Duze pliki - nie indeksowac (mniej pamieci, mniej zawieszek)
+package-lock.json
+*.tsbuildinfo
+*.log
+*.db
+*.db-wal
+*.db-shm
+
+# Zduplikowany serwer do Railway - indeksuj tylko server/
+_railway_deploy/**
+
+# Zrzuty ekranu i assety (duzo PNG - obciazaja indeks)
+screenshots/**
+deploy/**
+server/public/landing/screenshots/**
+server/public/landing/*.png
+icons/**
+public/icons/**
+build/icon.ico
+
+# Stan Cursor - nie indeksowac
+.cursor/**
